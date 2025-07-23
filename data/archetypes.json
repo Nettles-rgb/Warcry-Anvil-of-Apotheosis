@@ -1,0 +1,48 @@
+[
+  {
+    "name": "Commander",
+    "points": 0,
+    "effects": [],
+    "attackProfile": null,
+    "restrictions": {
+      "forbiddenFighters": [],
+      "forbiddenFactions": [],
+      "mustUseOneHandedPrimary": false,
+      "forbidSecondaryEquipment": false
+    }
+  },
+  {
+    "name": "Priest",
+    "points": 5,
+    "effects": ["gain runemark: Priest"],
+    "attackProfile": null,
+    "restrictions": {
+      "forbiddenFighters": ["Saurus"],
+      "forbiddenFactions": ["Kharadron Overlords"],
+      "mustUseOneHandedPrimary": false,
+      "forbidSecondaryEquipment": false
+    }
+  },
+  {
+    "name": "Mage",
+    "points": 20,
+    "effects": [
+      "-1 melee attack (min 1)",
+      "gain runemark: Mystic"
+    ],
+    "attackProfile": {
+      "range": [3, 7],
+      "attacks": 2,
+      "strength": 3,
+      "damage": 3,
+      "crit": 6,
+      "blast": true
+    },
+    "restrictions": {
+      "forbiddenFighters": ["Saurus"],
+      "forbiddenFactions": ["Kharadron Overlords"],
+      "mustUseOneHandedPrimary": true,
+      "forbidSecondaryEquipment": true
+    }
+  }
+]

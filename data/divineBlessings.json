@@ -1,0 +1,56 @@
+[
+  {
+    "name": "Swiftness",
+    "effect": { "movementBonus": 1 },
+    "pointsLow": 15,
+    "pointsHigh": 25
+  },
+  {
+    "name": "Resilience",
+    "effect": { "toughnessBonus": 1 },
+    "pointsLow": 15,
+    "pointsHigh": 20
+  },
+  {
+    "name": "Fortitude",
+    "effect": { "woundsBonus": 4 },
+    "pointsLow": 15,
+    "pointsHigh": 15
+  },
+  {
+    "name": "Ferocity",
+    "effect": { "attackBonus": 1 },
+    "pointsLow": 25,
+    "pointsHigh": 30
+  },
+  {
+    "name": "Might",
+    "effect": { "strengthBonus": 1 },
+    "pointsLow": 15,
+    "pointsHigh": 20
+  },
+  {
+    "name": "Brutality",
+    "effect": { "damageBonus": 1 },
+    "pointsLow": 25,
+    "pointsHigh": 30
+  },
+  {
+    "name": "Savagery",
+    "effect": { "critBonus": 1 },
+    "pointsLow": 10,
+    "pointsHigh": 10
+  },
+  {
+    "name": "Spite",
+    "effect": { "special": "1 free reaction per battle round (as if spending a level of renown)" },
+    "pointsLow": 30,
+    "pointsHigh": 30
+  },
+  {
+    "name": "Destiny",
+    "effect": { "special": "Begin battle with one saved wild dice" },
+    "pointsLow": 40,
+    "pointsHigh": 40
+  }
+]

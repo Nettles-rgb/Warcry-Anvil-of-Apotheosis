@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Fast Mount",
+    "points": 55,
+    "modifiers": {
+      "movementBonus": 5,
+      "woundsBonus": 5,
+      "attackBonus": 0,
+      "toughnessBonus": 0
+    },
+    "runemarksAdded": ["Mounted"],
+    "restrictions": {
+      "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
+      "specialCases": ["Malignants do not gain the Mounted runemark"],
+      "maxMovement": 12
+    }
+  },
+  {
+    "name": "Heavy Mount",
+    "points": 55,
+    "modifiers": {
+      "movementBonus": 3,
+      "woundsBonus": 5,
+      "attackBonus": 1,
+      "toughnessBonus": 0
+    },
+    "runemarksAdded": ["Mounted"],
+    "restrictions": {
+      "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
+      "specialCases": ["Malignants do not gain the Mounted runemark"],
+      "maxMovement": 8
+    }
+  },
+  {
+    "name": "Flying Mount",
+    "points": 40,
+    "modifiers": {
+      "movementBonus": 3,
+      "woundsBonus": 5,
+      "attackBonus": 0,
+      "toughnessBonus": 0
+    },
+    "runemarksAdded": ["Fly"],
+    "restrictions": {
+      "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
+      "specialCases": [],
+      "maxMovement": 10
+    }
+  }
+]

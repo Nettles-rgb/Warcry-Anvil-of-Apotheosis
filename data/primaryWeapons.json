@@ -1,0 +1,210 @@
+[
+  {
+    "name": "Hand Weapon",
+    "points": 0,
+    "handedness": "one",
+    "modifiers": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Spear",
+    "points": 0,
+    "handedness": "one",
+    "modifiers": {
+      "rangeBonus": 1,
+      "attackBonus": -1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 1
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Halberd",
+    "points": 5,
+    "handedness": "two",
+    "modifiers": {
+      "rangeBonus": 1,
+      "attackBonus": -1,
+      "strengthBonus": 1,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Great Weapon",
+    "points": 5,
+    "handedness": "two",
+    "modifiers": {
+      "rangeBonus": 0,
+      "attackBonus": -1,
+      "strengthBonus": 1,
+      "damageBonus": 1,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Flail",
+    "points": 5,
+    "handedness": "two",
+    "modifiers": {
+      "rangeBonus": 2,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Staff",
+    "points": -5,
+    "handedness": "one",
+    "modifiers": {
+      "rangeBonus": 1,
+      "attackBonus": -1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Dagger",
+    "points": -10,
+    "handedness": "one",
+    "modifiers": {
+      "rangeBonus": 0,
+      "attackBonus": -1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Great Bow",
+    "points": 30,
+    "handedness": "two",
+    "modifiers": {},
+    "addsRangedProfile": {
+      "range": [3, 15],
+      "attacks": 2,
+      "strength": "baseStrength",
+      "damage": 2,
+      "crit": 5
+    },
+    "notes": ["Fighter counts as unarmed in melee"]
+  },
+  {
+    "name": "Grandspear",
+    "points": 5,
+    "handedness": "two",
+    "modifiers": {
+      "rangeBonus": 1,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Throwing Spear",
+    "points": 5,
+    "handedness": "one",
+    "modifiers": {
+      "rangeBonus": 0,
+      "attackBonus": -2,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 1
+    },
+    "addsRangedProfile": {
+      "range": [1, 8],
+      "attacks": 1,
+      "strength": "baseStrength",
+      "damage": 0,
+      "crit": 0
+    },
+    "notes": []
+  },
+  {
+    "name": "Throwing Axe",
+    "points": 10,
+    "handedness": "one",
+    "modifiers": {
+      "rangeBonus": 0,
+      "attackBonus": -1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": {
+      "range": [1, 8],
+      "attacks": 1,
+      "strength": "baseStrength",
+      "damage": 0,
+      "crit": 0
+    },
+    "notes": []
+  },
+  {
+    "name": "Handgun",
+    "points": 20,
+    "handedness": "two",
+    "modifiers": {},
+    "addsRangedProfile": {
+      "range": [3, 12],
+      "attacks": 2,
+      "strength": 4,
+      "damage": 2,
+      "crit": 5
+    },
+    "notes": ["Fighter counts as unarmed in melee"]
+  },
+  {
+    "name": "Pistol",
+    "points": -10,
+    "handedness": "one",
+    "modifiers": {},
+    "addsRangedProfile": {
+      "range": [1, 8],
+      "attacks": 2,
+      "strength": 4,
+      "damage": 1,
+      "crit": 3
+    },
+    "notes": ["Replaces melee profile entirely"]
+  },
+  {
+    "name": "Brace of Pistols",
+    "points": 10,
+    "handedness": "two",
+    "modifiers": {},
+    "addsRangedProfile": {
+      "range": [1, 8],
+      "attacks": 4,
+      "strength": 4,
+      "damage": 1,
+      "crit": 3
+    },
+    "notes": ["Replaces melee profile entirely"]
+  }
+]

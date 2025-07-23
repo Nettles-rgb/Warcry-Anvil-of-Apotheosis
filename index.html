@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Warcry Anvil of Apotheosis Builder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Warcry Anvil of Apotheosis Builder</h1>
+  <div class="builder">
+    <div class="options">
+      <h2>Selections</h2>
+      <label>Base Fighter:</label>
+      <select id="fighterSelect"></select>
+
+      <label>Faction Runemark:</label>
+      <select id="factionSelect"></select>
+
+      <label>Archetype:</label>
+      <select id="archetypeSelect"></select>
+
+      <label>Primary Weapon:</label>
+      <select id="primarySelect"></select>
+
+      <label>Secondary Weapon:</label>
+      <select id="secondarySelect"></select>
+
+      <label>Mount:</label>
+      <select id="mountSelect"></select>
+
+      <label>Divine Blessing:</label>
+      <select id="blessingSelect"></select>
+
+      <label>Extra Runemark:</label>
+      <select id="runemarkSelect"></select>
+
+      <button onclick="saveBuild()">Save Build</button>
+      <button onclick="loadBuild()">Load Build</button>
+      <button onclick="exportBuild()">Export Build</button>
+      <div id="validationMessages"></div>
+    </div>
+
+    <div class="summary">
+      <h2>Summary</h2>
+      <div class="stat-block" id="statsDisplay">
+        <p><strong>Name:</strong> <span id="fighterName">-</span></p>
+        <p><strong>Runemarks:</strong> <span id="runemarkDisplay">-</span></p>
+        <p><strong>Stats:</strong> 
+          Mv <span id="statMv"></span>,
+          T <span id="statT"></span>,
+          W <span id="statW"></span>,
+          A <span id="statA"></span>,
+          S <span id="statS"></span>,
+          D/C <span id="statDC"></span>
+        </p>
+        <p><strong>Attack Profiles:</strong></p>
+        <ul id="attackProfiles"></ul>
+        <p><strong>Total Points:</strong> <span id="pointsTotal">0</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+[
+  {
+    "name": "Shield",
+    "points": 5,
+    "modifiers": {
+      "toughnessBonus": 1,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": []
+  },
+  {
+    "name": "Bow",
+    "points": 45,
+    "modifiers": {
+      "toughnessBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": {
+      "range": [3, 15],
+      "attacks": 2,
+      "strength": "baseStrength",
+      "damage": 1,
+      "crit": 3
+    },
+    "notes": []
+  },
+  {
+    "name": "Additional Hand Weapon",
+    "points": 10,
+    "modifiers": {
+      "toughnessBonus": 0,
+      "attackBonus": 1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": null,
+    "notes": ["Applies bonus to melee profile only"]
+  },
+  {
+    "name": "Pistol",
+    "points": 20,
+    "modifiers": {
+      "toughnessBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": {
+      "range": [1, 8],
+      "attacks": 2,
+      "strength": 4,
+      "damage": 1,
+      "crit": 3
+    },
+    "notes": []
+  },
+  {
+    "name": "Throwing Daggers",
+    "points": 20,
+    "modifiers": {
+      "toughnessBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": {
+      "range": [1, 8],
+      "attacks": 3,
+      "strength": 3,
+      "damage": 1,
+      "crit": 2
+    },
+    "notes": []
+  },
+  {
+    "name": "Sling",
+    "points": 5,
+    "modifiers": {
+      "toughnessBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "addsRangedProfile": {
+      "range": [1, 8],
+      "attacks": 2,
+      "strength": 2,
+      "damage": 1,
+      "crit": 2
+    },
+    "notes": []
+  }
+]

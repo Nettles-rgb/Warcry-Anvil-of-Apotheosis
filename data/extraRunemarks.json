@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Fly",
+    "points": 15,
+    "restrictions": {
+      "cannotBeMounted": true
+    }
+  },
+  {
+    "name": "Generic",
+    "points": 5,
+    "restrictions": {
+      "cannotBeMounted": false
+    }
+  }
+]
