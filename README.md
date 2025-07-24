@@ -5,3 +5,6 @@ A translation of the generic Anvil of Apotheosis character creator from Age of S
 Points values probably need some work at this stage:
 - Base values determined using existing fighter profiles with some modifications
 - Equipment options pointed using a custom algorithm (bad stats on existing profiles)
+
+Link to the interactive builder:
+https://nettles-rgb.github.io/Warcry-Anvil-of-Apotheosis/
