@@ -171,6 +171,7 @@ function updateSummary() {
   if (blessing && blessing.name !== 'None') {
     blessingEffectText = blessing.effect.special || JSON.stringify(blessing.effect);
     const e = blessing.effect;
+    blessingName = JSON.stringify(blessing.name);
     if (e.movementBonus) stats.Mv += e.movementBonus;
     if (e.toughnessBonus) stats.T += e.toughnessBonus;
     if (e.woundsBonus) stats.W += e.woundsBonus;
