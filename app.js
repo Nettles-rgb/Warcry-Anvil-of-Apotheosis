@@ -212,14 +212,11 @@ function updateSummary() {
   }
   if (extraRunemark && extraRunemark.name !== 'None') totalPoints += extraRunemark.points;
 
-  // Display
+  // Display - Updated to remove S, A, D stats and only show Mv, T, W
   document.getElementById('fighterType').textContent = fighter.name;
   document.getElementById('fighterName').textContent = document.getElementById('fighterNameInput').value || 'Unnamed';
   document.getElementById('runemarkDisplay').textContent = runemarks.join(', ') || '-';
   document.getElementById('factionRunemarkDisplay').textContent = factionRunemark || '-';
-  document.getElementById('statMv').textContent = stats.Mv;
-  document.getElementById('statT').textContent = stats.T;
-  document.getElementById('statW').textContent = stats.W;
   document.getElementById('statMv').textContent = stats.Mv;
   document.getElementById('statT').textContent = stats.T;
   document.getElementById('statW').textContent = stats.W;
