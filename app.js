@@ -202,11 +202,7 @@ function updateSummary() {
     stats.T += (secondary.modifiers.toughnessBonus || 0);
     stats.A += (secondary.modifiers.attackBonus || 0);
   }
-
-  if (mount && mount.restrictions.maxMovement) {
-    stats.Mv = Math.min(stats.Mv, mount.restrictions.maxMovement);
-  }
-
+  
   const profiles = buildProfiles(stats, fighter, primary, secondary, archetype, blessing);
   validateBuild(runemarks, profiles, fighter, archetype, mount);
 
