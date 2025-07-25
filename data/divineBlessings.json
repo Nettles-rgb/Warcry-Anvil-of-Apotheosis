@@ -2,63 +2,54 @@
   {
     "name": "Swiftness",
     "effect": { "movementBonus": 1 },
-    "desc": { "Add 1 to the Move characteristic of this fighter." },
     "pointsLow": 15,
     "pointsHigh": 25
   },
   {
     "name": "Resilience",
     "effect": { "toughnessBonus": 1 },
-    "desc": { "Add 1 to the Toughness characteristic of this fighter." },
     "pointsLow": 15,
     "pointsHigh": 20
   },
   {
     "name": "Fortitude",
     "effect": { "woundsBonus": 4 },
-    "desc": { "Add 4 to the Wounds characteristic of this fighter." },
     "pointsLow": 15,
     "pointsHigh": 15
   },
   {
     "name": "Ferocity",
     "effect": { "attackBonus": 1 },
-    "desc": { "Add 1 to the Attacks characteristic of one of this fighter's melee weapons." },
     "pointsLow": 25,
     "pointsHigh": 30
   },
   {
     "name": "Might",
     "effect": { "strengthBonus": 1 },
-    "desc": { "Add 1 to the Strength characteristic of one of this fighter's weapons." },
     "pointsLow": 15,
     "pointsHigh": 20
   },
   {
     "name": "Brutality",
     "effect": { "damageBonus": 1 },
-    "desc": { "Add 1 to the first Damage characteristic of one of this fighter's melee weapons" },
     "pointsLow": 25,
     "pointsHigh": 30
   },
   {
     "name": "Savagery",
     "effect": { "critBonus": 1 },
-    "desc": { "Add 1 to the second Damage characteristic of one of this fighter's melee weapons" },
     "pointsLow": 10,
     "pointsHigh": 10
   },
   {
     "name": "Spite",
     "effect": { "special": "1 free reaction per battle round (as if spending a level of renown)" },
-    "desc": { "Make up to one 'free' reaction per battle round as if spending a level of renown." },
     "pointsLow": 30,
     "pointsHigh": 30
   },
   {
     "name": "Destiny",
     "effect": { "special": "Begin battle with one saved wild dice" },
-    "desc": { "Begin the battle with one saved wild dice." },
     "pointsLow": 40,
     "pointsHigh": 40
   }
