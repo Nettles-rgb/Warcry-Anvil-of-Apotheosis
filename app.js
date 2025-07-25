@@ -62,7 +62,8 @@ function handleBlessingTargetVisibility() {
 
 function validateBuild(runemarks, profiles, fighter, archetype, mount) {
   const messages = [];
-
+  
+  // Archetype restrictions
   if (archetype) {
     if (archetype.restrictions.forbiddenFighters.includes(fighter.name)) {
       messages.push(`${archetype.name} cannot be taken by ${fighter.name}.`);
@@ -71,17 +72,25 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount) {
       messages.push(`${archetype.name} cannot be taken by fighters from ${archetype.restrictions.forbiddenFactions.join(', ')}.`);
     }
   }
+
+  // Mount restrictions
   if (mount && mount.name !== 'None') {
     if (mount.restrictions.forbiddenFighters.includes(fighter.name)) {
       messages.push(`${mount.name} cannot be taken by ${fighter.name}.`);
     }
   }
+  
+  // Runemark cap (excluding faction runemark)
   if (runemarks.length > rules.maxRunemarks) {
     messages.push(`Too many runemarks (max ${rules.maxRunemarks}, excluding faction).`);
   }
+
+  // Attack action cap
   if (profiles.length > rules.maxAttackActions) {
     messages.push(`Too many attack profiles (max ${rules.maxAttackActions}).`);
   }
+
+  // Secondary weapon restrictions
   const primary = data.primaryWeapons.find(w => w.name === document.getElementById('primarySelect').value);
   const secondary = document.getElementById('secondarySelect').value;
   if (secondary !== 'None' && primary.handedness !== 'one') {
@@ -95,6 +104,7 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount) {
 function buildProfiles(stats, fighter, primary, secondary, archetype, blessing) {
   const profiles = [];
 
+  // Base melee profile
   let meleeProfile = {
     type: 'Melee',
     range: fighter.R + (primary.modifiers?.rangeBonus || 0),
@@ -104,6 +114,7 @@ function buildProfiles(stats, fighter, primary, secondary, archetype, blessing) 
     crit: stats.C
   };
 
+  // Handle unarmed or replaced melee
   if (primary.notes.includes('Fighter counts as unarmed in melee')) {
     meleeProfile.attacks = Math.max(meleeProfile.attacks + rules.unarmedPenalties.attackPenalty, rules.unarmedPenalties.minimumValues.attacks);
     meleeProfile.damage = Math.max(meleeProfile.damage + rules.unarmedPenalties.damagePenalty, rules.unarmedPenalties.minimumValues.damage);
@@ -114,8 +125,11 @@ function buildProfiles(stats, fighter, primary, secondary, archetype, blessing) 
   }
   if (meleeProfile) profiles.push(meleeProfile);
 
+  // Add ranged profiles from weapons
   if (primary.addsRangedProfile) profiles.push(resolveRangedProfile(primary.addsRangedProfile, stats));
   if (secondary && secondary.addsRangedProfile) profiles.push(resolveRangedProfile(secondary.addsRangedProfile, stats));
+
+  // Archetype special attacks (Mage)
   if (archetype && archetype.attackProfile) profiles.push(resolveRangedProfile(archetype.attackProfile, stats));
 
   // Apply targetable blessing effects to profiles (if not already applied globally)
@@ -155,6 +169,7 @@ function updateSummary() {
   let runemarks = [...fighter.runemarks];
   let factionRunemark = faction;
 
+  // Archetype runemarks & effects
   if (archetype) {
     if (archetype.effects.includes('gain runemark: Mystic')) runemarks.push('Mystic');
     if (archetype.effects.includes('gain runemark: Priest')) runemarks.push('Priest');
@@ -175,6 +190,7 @@ function updateSummary() {
     }
   }
 
+  // Blessing
   let blessingEffectText = 'None';
   if (blessing && blessing.name !== 'None') {
     blessingEffectText = `${blessing.name}: ${blessing.description}`;
@@ -190,8 +206,10 @@ function updateSummary() {
     }
   }
 
+  // Extra runemarks
   if (extraRunemark && extraRunemark.name !== 'None') runemarks.push(extraRunemark.name);
 
+  // Modifiers from primary or secondary equipment
   if (primary.modifiers) {
     stats.A += (primary.modifiers.attackBonus || 0);
     stats.S += (primary.modifiers.strengthBonus || 0);
@@ -202,10 +220,14 @@ function updateSummary() {
     stats.T += (secondary.modifiers.toughnessBonus || 0);
     stats.A += (secondary.modifiers.attackBonus || 0);
   }
-  
+
+  // Build profiles
   const profiles = buildProfiles(stats, fighter, primary, secondary, archetype, blessing);
+
+  // Validate
   validateBuild(runemarks, profiles, fighter, archetype, mount);
 
+  // Points calculation
   let totalPoints = fighter.points + (archetype?.points || 0) + (primary?.points || 0);
   if (secondary && secondary.name !== 'None') totalPoints += secondary.points;
   if (mount && mount.name !== 'None') totalPoints += mount.points;
@@ -214,6 +236,7 @@ function updateSummary() {
   }
   if (extraRunemark && extraRunemark.name !== 'None') totalPoints += extraRunemark.points;
 
+  // Display
   document.getElementById('fighterType').textContent = fighter.name;
   document.getElementById('fighterName').textContent = document.getElementById('fighterNameInput').value || 'Unnamed';
   document.getElementById('runemarkDisplay').textContent = runemarks.join(', ') || '-';
