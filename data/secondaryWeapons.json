@@ -55,7 +55,7 @@
       "critBonus": 0
     },
     "addsRangedProfile": {
-      "range": [1, 8],
+      "range": [0, 8],
       "attacks": 2,
       "strength": 4,
       "damage": 1,
@@ -74,7 +74,7 @@
       "critBonus": 0
     },
     "addsRangedProfile": {
-      "range": [1, 8],
+      "range": [0, 8],
       "attacks": 3,
       "strength": 3,
       "damage": 1,
@@ -93,7 +93,7 @@
       "critBonus": 0
     },
     "addsRangedProfile": {
-      "range": [1, 8],
+      "range": [0, 8],
       "attacks": 2,
       "strength": 2,
       "damage": 1,

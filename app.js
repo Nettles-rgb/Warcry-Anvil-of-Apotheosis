@@ -89,7 +89,7 @@ function buildProfiles(stats, fighter, primary, secondary, archetype) {
   // Base melee profile (with reach)
   let meleeProfile = {
     type: 'Melee',
-    range: fighter.R + (primary.modifiers?.rangeBonus || 0),
+    range: [fighter.R + (primary.modifiers?.rangeBonus || 0), fighter.R + (primary.modifiers?.rangeBonus || 0)],
     attacks: stats.A,
     strength: stats.S,
     damage: stats.D,
@@ -109,10 +109,10 @@ function buildProfiles(stats, fighter, primary, secondary, archetype) {
 
   // Add ranged profiles from weapons
   if (primary.addsRangedProfile) {
-    profiles.push(resolveRangedProfile(primary.addsRangedProfile, stats));
+    profiles.push(resolveRangedProfile(primary.addsRangedProfile, stats, primary.modifiers));
   }
   if (secondary && secondary.addsRangedProfile) {
-    profiles.push(resolveRangedProfile(secondary.addsRangedProfile, stats));
+    profiles.push(resolveRangedProfile(secondary.addsRangedProfile, stats, secondary.modifiers));
   }
 
   // Archetype special attacks (Mage)
@@ -123,11 +123,29 @@ function buildProfiles(stats, fighter, primary, secondary, archetype) {
   return profiles;
 }
 
-function resolveRangedProfile(profile, stats) {
+function resolveRangedProfile(profile, stats, modifiers = {}) {
   const p = { ...profile, type: 'Ranged' };
+  
+  // Handle base stat substitutions
   if (p.strength === 'baseStrength') {
     p.strength = stats.S;
   }
+  if (p.attacks === 'baseAttacks') {
+    p.attacks = stats.A;
+  }
+  if (p.damage === 'baseDamage') {
+    p.damage = stats.D;
+  }
+  if (p.crit === 'baseCrit') {
+    p.crit = stats.C;
+  }
+  
+  // Apply weapon modifiers to the profile
+  if (modifiers.attackBonus) p.attacks += modifiers.attackBonus;
+  if (modifiers.strengthBonus) p.strength += modifiers.strengthBonus;
+  if (modifiers.damageBonus) p.damage += modifiers.damageBonus;
+  if (modifiers.critBonus) p.crit += modifiers.critBonus;
+  
   return p;
 }
 
@@ -212,7 +230,7 @@ function updateSummary() {
   }
   if (extraRunemark && extraRunemark.name !== 'None') totalPoints += extraRunemark.points;
 
-  // Display
+  // Display - Updated to remove S, A, D stats and only show Mv, T, W
   document.getElementById('fighterType').textContent = fighter.name;
   document.getElementById('fighterName').textContent = document.getElementById('fighterNameInput').value || 'Unnamed';
   document.getElementById('runemarkDisplay').textContent = runemarks.join(', ') || '-';
@@ -220,15 +238,18 @@ function updateSummary() {
   document.getElementById('statMv').textContent = stats.Mv;
   document.getElementById('statT').textContent = stats.T;
   document.getElementById('statW').textContent = stats.W;
-  document.getElementById('statMv').textContent = stats.Mv;
-  document.getElementById('statT').textContent = stats.T;
-  document.getElementById('statW').textContent = stats.W;
   document.getElementById('blessingEffect').textContent = blessingEffectText;
   document.getElementById('pointsTotal').textContent = totalPoints;
 
-  const attackList = profiles.map(p => 
-    `<li>${p.type}: Range ${p.range ? (Array.isArray(p.range) ? p.range.join('-') : p.range) : 'Melee'}, Attacks ${p.attacks}, Strength ${p.strength}, Damage ${p.damage}/${p.crit}</li>`
-  ).join('');
+  const attackList = profiles.map(p => {
+    let rangeText;
+    if (p.type === 'Melee') {
+      rangeText = Array.isArray(p.range) ? p.range[0] : p.range;
+    } else {
+      rangeText = Array.isArray(p.range) ? p.range.join('-') : p.range;
+    }
+    return `<li>${p.type}: Range ${rangeText}, Attacks ${p.attacks}, Strength ${p.strength}, Damage ${p.damage}/${p.crit}</li>`;
+  }).join('');
   document.getElementById('attackProfiles').innerHTML = attackList;
 }
 
