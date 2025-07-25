@@ -155,6 +155,19 @@ function buildProfiles(stats, fighter, primary, secondary, archetype, blessing) 
   // Archetype special attacks (Mage)
   if (archetype && archetype.attackProfile) profiles.push(resolveRangedProfile(archetype.attackProfile, stats));
 
+  // Apply targetable blessing effects to one chosen profile
+  if (blessing && blessing.targetable) {
+    const targetIdx = parseInt(document.getElementById('blessingTargetSelect').value || -1);
+    if (!isNaN(targetIdx) && profiles[targetIdx]) {
+      const p = profiles[targetIdx];
+      if (blessing.effect.attackBonus) p.attacks += blessing.effect.attackBonus;
+      if (blessing.effect.strengthBonus) p.strength += blessing.effect.strengthBonus;
+      if (blessing.effect.damageBonus) p.damage += blessing.effect.damageBonus;
+      if (blessing.effect.critBonus) p.crit += blessing.effect.critBonus;
+    }
+  }
+
+
   return profiles;
 }
 
@@ -225,10 +238,6 @@ function updateSummary() {
   const profiles = buildProfiles(stats, fighter, primary, secondary, archetype, blessing);
 
   // Blessing target dropdown population (AFTER profiles are built)
-    // Build profiles first (without blessing applied yet)
-  const profiles = buildProfiles(stats, fighter, primary, secondary, archetype, null);
-
-  // Blessing target dropdown and application
   const targetSelect = document.getElementById('blessingTargetSelect');
   targetSelect.innerHTML = '';
   targetSelect.style.display = 'none';
@@ -237,9 +246,13 @@ function updateSummary() {
   if (blessing && blessing.targetable) {
     const eligible = profiles
       .map((p, idx) => {
-        const isMelee = !p.range || (Array.isArray(p.range) && ((p.range.length === 1 && p.range[0] <= 3) || (p.range.length === 2 && (p.range[0] === 0 || !p.range[0]) && p.range[1] <= 3)));
-        const matches = blessing.targetProfile === 'any' || (blessing.targetProfile === 'melee' && isMelee);
-        return matches ? { idx, label: `${p.type}: Range ${p.range ? (Array.isArray(p.range) ? p.range.join('-') : p.range) : 'Melee'}` } : null;
+        const isMelee =
+          !p.range ||
+          (Array.isArray(p.range) && (p.range[0] === 0 || !p.range[0]) && p.range[1] <= 3);
+        const matches =
+          blessing.targetProfile === 'any' ||
+          (blessing.targetProfile === 'melee' && isMelee);
+        return matches ? { idx, label: `${p.type} (${p.range ? (Array.isArray(p.range) ? p.range.join('-') : p.range) : 'Melee'})` } : null;
       })
       .filter(Boolean);
 
@@ -253,18 +266,8 @@ function updateSummary() {
         targetSelect.appendChild(opt);
       });
       targetSelect.style.display = 'block';
-
-      // Apply blessing effect to the selected profile
-      const chosen = profiles[parseInt(targetSelect.value) || 0];
-      if (chosen) {
-        if (blessing.effect.attackBonus) chosen.attacks += blessing.effect.attackBonus;
-        if (blessing.effect.strengthBonus) chosen.strength += blessing.effect.strengthBonus;
-        if (blessing.effect.damageBonus) chosen.damage += blessing.effect.damageBonus;
-        if (blessing.effect.critBonus) chosen.crit += blessing.effect.critBonus;
-      }
     }
   }
-
 
   validateBuild(runemarks, profiles, fighter, archetype, mount);
 
