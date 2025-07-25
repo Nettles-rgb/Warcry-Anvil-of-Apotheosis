@@ -137,13 +137,13 @@
       "critBonus": 1
     },
     "addsRangedProfile": {
-      "range": [1, 8],
-      "attacks": 1,
+      "range": [0, 8],
+      "attacks": "baseAttacks",
       "strength": "baseStrength",
-      "damage": 0,
-      "crit": 0
+      "damage": "baseDamage",
+      "crit": "baseCrit"
     },
-    "notes": []
+    "notes": ["Replaces melee profile entirely"]
   },
   {
     "name": "Throwing Axe",
@@ -157,13 +157,13 @@
       "critBonus": 0
     },
     "addsRangedProfile": {
-      "range": [1, 8],
-      "attacks": 1,
+      "range": [0, 8],
+      "attacks": "baseAttacks",
       "strength": "baseStrength",
-      "damage": 0,
-      "crit": 0
+      "damage": "baseDamage",
+      "crit": "baseCrit"
     },
-    "notes": []
+    "notes": ["Replaces melee profile entirely"]
   },
   {
     "name": "Handgun",
@@ -185,7 +185,7 @@
     "handedness": "one",
     "modifiers": {},
     "addsRangedProfile": {
-      "range": [1, 8],
+      "range": [0, 8],
       "attacks": 2,
       "strength": 4,
       "damage": 1,
@@ -199,7 +199,7 @@
     "handedness": "two",
     "modifiers": {},
     "addsRangedProfile": {
-      "range": [1, 8],
+      "range": [0, 8],
       "attacks": 4,
       "strength": 4,
       "damage": 1,
