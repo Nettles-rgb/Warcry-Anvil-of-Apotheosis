@@ -191,7 +191,6 @@ function updateSummary() {
   let runemarks = [...fighter.runemarks];
   let factionRunemark = faction;
 
-  // Archetype runemarks & effects
   if (archetype) {
     if (archetype.effects.includes('gain runemark: Mystic')) runemarks.push('Mystic');
     if (archetype.effects.includes('gain runemark: Priest')) runemarks.push('Priest');
@@ -200,19 +199,14 @@ function updateSummary() {
     }
   }
 
-  // Mount
   if (mount && mount.name !== 'None') {
     stats.Mv += mount.modifiers.movementBonus;
     stats.W += mount.modifiers.woundsBonus;
     stats.A += mount.modifiers.attackBonus;
     stats.T += mount.modifiers.toughnessBonus;
     if (fighter.name !== 'Malignant') runemarks.push(...mount.runemarksAdded);
-    if (mount.restrictions.maxMovement) {
-      stats.Mv = Math.min(stats.Mv, mount.restrictions.maxMovement);
-    }
   }
 
-  // Blessing
   let blessingEffectText = 'None';
   if (blessing && blessing.name !== 'None') {
     blessingEffectText = `${blessing.name}: ${blessing.description}`;
@@ -228,10 +222,8 @@ function updateSummary() {
     }
   }
 
-  // Extra runemarks
   if (extraRunemark && extraRunemark.name !== 'None') runemarks.push(extraRunemark.name);
 
-  // Modifiers from primary or secondary equipment
   if (primary.modifiers) {
     stats.A += (primary.modifiers.attackBonus || 0);
     stats.S += (primary.modifiers.strengthBonus || 0);
@@ -243,13 +235,42 @@ function updateSummary() {
     stats.A += (secondary.modifiers.attackBonus || 0);
   }
 
-  // Build profiles
   const profiles = buildProfiles(stats, fighter, primary, secondary, archetype, blessing);
 
-  // Validate
+  // Blessing target dropdown population (AFTER profiles are built)
+  const targetSelect = document.getElementById('blessingTargetSelect');
+  targetSelect.innerHTML = '';
+  targetSelect.style.display = 'none';
+  document.getElementById('validationMessages').innerHTML = '';
+
+  if (blessing && blessing.targetable) {
+    const eligible = profiles
+      .map((p, idx) => {
+        const isMelee =
+          !p.range ||
+          (Array.isArray(p.range) && (p.range[0] === 0 || !p.range[0]) && p.range[1] <= 3);
+        const matches =
+          blessing.targetProfile === 'any' ||
+          (blessing.targetProfile === 'melee' && isMelee);
+        return matches ? { idx, label: `${p.type} (${p.range ? (Array.isArray(p.range) ? p.range.join('-') : p.range) : 'Melee'})` } : null;
+      })
+      .filter(Boolean);
+
+    if (eligible.length === 0) {
+      document.getElementById('validationMessages').innerHTML = `Warning: No eligible attack profiles for ${blessing.name}.`;
+    } else {
+      eligible.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.idx;
+        opt.textContent = e.label;
+        targetSelect.appendChild(opt);
+      });
+      targetSelect.style.display = 'block';
+    }
+  }
+
   validateBuild(runemarks, profiles, fighter, archetype, mount);
 
-  // Points calculation
   let totalPoints = fighter.points + (archetype?.points || 0) + (primary?.points || 0);
   if (secondary && secondary.name !== 'None') totalPoints += secondary.points;
   if (mount && mount.name !== 'None') totalPoints += mount.points;
@@ -258,7 +279,6 @@ function updateSummary() {
   }
   if (extraRunemark && extraRunemark.name !== 'None') totalPoints += extraRunemark.points;
 
-  // Display
   document.getElementById('fighterType').textContent = fighter.name;
   document.getElementById('fighterName').textContent = document.getElementById('fighterNameInput').value || 'Unnamed';
   document.getElementById('runemarkDisplay').textContent = runemarks.join(', ') || '-';
@@ -266,11 +286,13 @@ function updateSummary() {
   document.getElementById('statMv').textContent = stats.Mv;
   document.getElementById('statT').textContent = stats.T;
   document.getElementById('statW').textContent = stats.W;
-  document.getElementById('blessingEffect').textContent = blessingEffectText +
-    (blessing && blessing.targetable ? ` (applied to ${document.getElementById('blessingTargetSelect').value} profile)` : '');
+  document.getElementById('blessingEffect').textContent =
+    blessingEffectText + (blessing && blessing.targetable && targetSelect.style.display === 'block'
+      ? ` (applied to ${targetSelect.options[targetSelect.selectedIndex]?.text})`
+      : '');
   document.getElementById('pointsTotal').textContent = totalPoints;
 
-  const attackList = profiles.map(p => 
+  const attackList = profiles.map(p =>
     `<li>${p.type}: Range ${p.range ? (Array.isArray(p.range) ? p.range.join('-') : p.range) : 'Melee'}, Attacks ${p.attacks}, Strength ${p.strength}, Damage ${p.damage}/${p.crit}</li>`
   ).join('');
   document.getElementById('attackProfiles').innerHTML = attackList;
