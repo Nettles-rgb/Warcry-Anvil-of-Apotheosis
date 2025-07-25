@@ -220,6 +220,9 @@ function updateSummary() {
   document.getElementById('statMv').textContent = stats.Mv;
   document.getElementById('statT').textContent = stats.T;
   document.getElementById('statW').textContent = stats.W;
+  document.getElementById('statMv').textContent = stats.Mv;
+  document.getElementById('statT').textContent = stats.T;
+  document.getElementById('statW').textContent = stats.W;
   document.getElementById('blessingEffect').textContent = blessingEffectText;
   document.getElementById('pointsTotal').textContent = totalPoints;
 
