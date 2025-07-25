@@ -48,17 +48,40 @@ function handleBlessingTargetVisibility() {
   const blessingName = document.getElementById('blessingSelect').value;
   const blessing = data.divineBlessings.find(b => b.name === blessingName);
   const sel = document.getElementById('blessingTargetSelect');
+  sel.innerHTML = ''; // reset
+
   if (blessing && blessing.targetable) {
-    sel.style.display = 'block';
-    sel.querySelectorAll('option').forEach(o => {
-      if (blessing.targetProfile === 'melee' && o.value !== 'melee') o.style.display = 'none';
-      else if (blessing.targetProfile === 'any') o.style.display = 'block';
-      else o.style.display = (o.value === 'melee') ? 'block' : 'none';
+    const profiles = document.querySelectorAll('#attackProfiles li');
+    const eligible = [];
+
+    profiles.forEach((li, idx) => {
+      const text = li.innerText.toLowerCase();
+      const isMelee = text.includes('range melee') || /range \d+-\d+/.test(text) && parseInt(text.match(/(\d+)-?(\d+)?/)[2] || text.match(/(\d+)/)[1]) <= 3;
+      if (blessing.targetProfile === 'any' || (blessing.targetProfile === 'melee' && isMelee)) {
+        eligible.push({ idx, label: li.innerText });
+      }
     });
-  } else {
+
+    if (eligible.length === 0) {
+      sel.style.display = 'none';
+      document.getElementById('validationMessages').innerHTML = 'Warning: No eligible attack profiles for this blessing.';
+      return;
+    }
+
+    eligible.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.idx;
+      opt.textContent = e.label;
+      sel.appendChild(opt);
+    });
+
+    sel.style.display = 'block';
+  } 
+  else {
     sel.style.display = 'none';
   }
 }
+
 
 function validateBuild(runemarks, profiles, fighter, archetype, mount) {
   const messages = [];
@@ -132,19 +155,18 @@ function buildProfiles(stats, fighter, primary, secondary, archetype, blessing) 
   // Archetype special attacks (Mage)
   if (archetype && archetype.attackProfile) profiles.push(resolveRangedProfile(archetype.attackProfile, stats));
 
-  // Apply targetable blessing effects to profiles (if not already applied globally)
+  // Apply targetable blessing effects to one chosen profile
   if (blessing && blessing.targetable) {
-    const targetChoice = document.getElementById('blessingTargetSelect').value;
-    profiles.forEach(p => {
-      const matches = (targetChoice === 'any') || (targetChoice === p.type.toLowerCase());
-      if (matches) {
-        if (blessing.effect.attackBonus) p.attacks += blessing.effect.attackBonus;
-        if (blessing.effect.strengthBonus) p.strength += blessing.effect.strengthBonus;
-        if (blessing.effect.damageBonus) p.damage += blessing.effect.damageBonus;
-        if (blessing.effect.critBonus) p.crit += blessing.effect.critBonus;
-      }
-    });
+    const targetIdx = parseInt(document.getElementById('blessingTargetSelect').value || -1);
+    if (!isNaN(targetIdx) && profiles[targetIdx]) {
+      const p = profiles[targetIdx];
+      if (blessing.effect.attackBonus) p.attacks += blessing.effect.attackBonus;
+      if (blessing.effect.strengthBonus) p.strength += blessing.effect.strengthBonus;
+      if (blessing.effect.damageBonus) p.damage += blessing.effect.damageBonus;
+      if (blessing.effect.critBonus) p.crit += blessing.effect.critBonus;
+    }
   }
+
 
   return profiles;
 }
@@ -244,9 +266,6 @@ function updateSummary() {
   document.getElementById('statMv').textContent = stats.Mv;
   document.getElementById('statT').textContent = stats.T;
   document.getElementById('statW').textContent = stats.W;
-  document.getElementById('statS').textContent = stats.S;
-  document.getElementById('statA').textContent = stats.A;
-  document.getElementById('statDC').textContent = `${stats.D}/${stats.C}`;
   document.getElementById('blessingEffect').textContent = blessingEffectText +
     (blessing && blessing.targetable ? ` (applied to ${document.getElementById('blessingTargetSelect').value} profile)` : '');
   document.getElementById('pointsTotal').textContent = totalPoints;
