@@ -69,16 +69,16 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount) {
 
   // Check for duplicate runemarks
   const uniqueRunemarks = new Set();
-  const duplicateFound = runemarks.some(runemark => {
+  const duplicates = runemarks.filter(runemark => {
     if (uniqueRunemarks.has(runemark)) {
-      return true;
+        return true;
     }
     uniqueRunemarks.add(runemark);
     return false;
   });
-
-  if (duplicateFound) {
-    messages.push('Warning: Duplicate runemarks detected! Consider choosing a different additional runemark.');
+  
+  if (duplicates.length > 0) {
+      messages.push(`Warning: Duplicate runemark(s) detected: ${duplicates.join(', ')}. Consider choosing a different additional runemark.`);
   }
 
   // Attack action cap
