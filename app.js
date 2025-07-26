@@ -42,7 +42,7 @@ function updateFactionOptions() {
   updateSummary();
 }
 
-function validateBuild(runemarks, profiles, fighter, archetype, mount, extraRunemarkName) {
+function validateBuild(runemarks, profiles, fighter, archetype, mount) {
   const messages = [];
 
   // Archetype restrictions
@@ -67,21 +67,6 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount, extraRune
     messages.push(`Too many runemarks (max ${rules.maxRunemarks}, excluding faction).`);
   }
 
-  // Check for duplicate runemarks
-  const uniqueRunemarks = new Set();
-  const allRunemarks = [...runemarks, extraRunemarkName].filter(Boolean); // Include faction runemark and filter out null/empty
-  const duplicates = allRunemarks.filter(runemark => {
-    if (uniqueRunemarks.has(runemark)) {
-        return true;
-    }
-    uniqueRunemarks.add(runemark);
-    return false;
-  });
-  
-  if (duplicates.length > 0) {
-      messages.push(`Warning: Duplicate runemark(s) detected: ${duplicates.join(', ')}. Consider choosing a different additional runemark.`);
-  }
-
   // Attack action cap
   if (profiles.length > rules.maxAttackActions) {
     messages.push(`Too many attack profiles (max ${rules.maxAttackActions}).`);
@@ -94,7 +79,8 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount, extraRune
     messages.push(`Secondary weapon only allowed with one-handed primary weapons.`);
   }
 
-  document.getElementById('validationMessages').innerHTML = messages.join('<br>');
+  // This is where duplicate runemark messages will be added if detected in updateSummary
+  // document.getElementById('validationMessages').innerHTML = messages.join('<br>'); // This line moved to updateSummary
   return messages.length === 0;
 }
 
@@ -177,6 +163,7 @@ function updateSummary() {
   let stats = { Mv: fighter.Mv, T: fighter.T, W: fighter.W, S: fighter.S, A: fighter.A, D: fighter.D, C: fighter.C };
   let runemarks = [...fighter.runemarks];
   let factionRunemark = faction;
+  let validationMessages = []; // Initialize an array for all validation messages
 
   // Archetype runemarks & effects
   if (archetype) {
@@ -213,8 +200,11 @@ function updateSummary() {
     if (e.critBonus) stats.C += e.critBonus;
   }
 
-  // Extra runemark
+  // Extra runemark - Check for duplicates before adding
   if (extraRunemark && extraRunemark.name !== 'None') {
+    if (runemarks.includes(extraRunemark.name)) {
+      validationMessages.push(`Warning: The additional runemark "${extraRunemark.name}" is already present.`);
+    }
     runemarks.push(extraRunemark.name);
   }
 
@@ -233,8 +223,13 @@ function updateSummary() {
   // Build profiles
   const profiles = buildProfiles(stats, fighter, primary, secondary, archetype);
 
-  // Validate
-  validateBuild(runemarks, profiles, fighter, archetype, mount, extraRunemark?.name);
+  // Validate the build and collect messages from validateBuild function
+  const buildValidationMessages = [];
+  if (!validateBuild(runemarks, profiles, fighter, archetype, mount)) {
+  }
+  
+  // Display all validation messages
+  document.getElementById('validationMessages').innerHTML = validationMessages.join('<br>') + (document.getElementById('validationMessages').innerHTML ? '<br>' + document.getElementById('validationMessages').innerHTML : '');
 
   // Points calculation
   let totalPoints = fighter.points + (archetype?.points || 0) + (primary?.points || 0);
