@@ -67,6 +67,20 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount) {
     messages.push(`Too many runemarks (max ${rules.maxRunemarks}, excluding faction).`);
   }
 
+  // Check for duplicate runemarks
+  const uniqueRunemarks = new Set();
+  const duplicateFound = runemarks.some(runemark => {
+    if (uniqueRunemarks.has(runemark)) {
+      return true;
+    }
+    uniqueRunemarks.add(runemark);
+    return false;
+  });
+
+  if (duplicateFound) {
+    messages.push('Warning: Duplicate runemarks detected! Consider choosing a different additional runemark.');
+  }
+
   // Attack action cap
   if (profiles.length > rules.maxAttackActions) {
     messages.push(`Too many attack profiles (max ${rules.maxAttackActions}).`);
