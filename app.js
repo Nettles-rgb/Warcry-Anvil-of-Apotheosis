@@ -42,7 +42,7 @@ function updateFactionOptions() {
   updateSummary();
 }
 
-function validateBuild(runemarks, profiles, fighter, archetype, mount) {
+function validateBuild(runemarks, profiles, fighter, archetype, mount, extraRunemark?.name) {
   const messages = [];
 
   // Archetype restrictions
@@ -69,7 +69,8 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount) {
 
   // Check for duplicate runemarks
   const uniqueRunemarks = new Set();
-  const duplicates = runemarks.filter(runemark => {
+  const allRunemarks = [...runemarks, extraRunemark?.name].filter(Boolean); // Include faction runemark and filter out null/empty
+  const duplicates = allRunemarks.filter(runemark => {
     if (uniqueRunemarks.has(runemark)) {
         return true;
     }
@@ -233,7 +234,7 @@ function updateSummary() {
   const profiles = buildProfiles(stats, fighter, primary, secondary, archetype);
 
   // Validate
-  validateBuild(runemarks, profiles, fighter, archetype, mount);
+  validateBuild(runemarks, profiles, fighter, archetype, mount, extraRunemark?.name);
 
   // Points calculation
   let totalPoints = fighter.points + (archetype?.points || 0) + (primary?.points || 0);
