@@ -19,8 +19,8 @@ async function init() {
 function populateSelections() {
   fillSelect('fighterSelect', data.fighters.map(f => f.name));
   fillSelect('archetypeSelect', data.archetypes.map(a => a.name));
-  
-  // Modified: Populate primarySelect with handedness
+
+  // Populate primarySelect with handedness
   const primaryWeaponOptions = data.primaryWeapons.map(w => `${w.name} (${w.handedness.charAt(0).toUpperCase() + w.handedness.slice(1)}-handed)`);
   fillSelect('primarySelect', primaryWeaponOptions);
 
@@ -44,6 +44,15 @@ function updateFactionOptions() {
   const fighter = data.fighters.find(f => f.name === fighterName);
   fillSelect('factionSelect', fighter.factionRunemarks);
   updateSummary();
+}
+
+// Helper function to extract the base weapon name from its display string
+function getPrimaryWeaponNameFromDisplay(displayString) {
+  const index = displayString.indexOf(' (');
+  if (index !== -1) {
+    return displayString.substring(0, index);
+  }
+  return displayString; // Fallback if no handedness in brackets
 }
 
 function validateBuild(runemarks, profiles, fighter, archetype, mount) {
@@ -78,11 +87,11 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount) {
 
   // Secondary weapon restrictions (handled in updateSummary for disabling, but keep this for validation message)
   const primarySelectValue = document.getElementById('primarySelect').value;
-  const primaryWeaponName = primarySelectValue.split(' ')[0]; // Extract name before '('
+  const primaryWeaponName = getPrimaryWeaponNameFromDisplay(primarySelectValue);
   const primary = data.primaryWeapons.find(w => w.name === primaryWeaponName);
-  const secondary = document.getElementById('secondarySelect').value;
-  
-  if (secondary !== 'None' && primary.handedness !== 'one') {
+  const secondary = document.getElementById('secondarySelect').value; // Get current selected secondary, even if disabled
+
+  if (secondary !== 'None' && primary?.handedness !== 'one') { // Use optional chaining for primary
     messages.push(`Secondary weapon only allowed with one-handed primary weapons.`);
   }
 
@@ -159,12 +168,12 @@ function updateSummary() {
   const fighter = data.fighters.find(f => f.name === document.getElementById('fighterSelect').value);
   const faction = document.getElementById('factionSelect').value;
   const archetype = data.archetypes.find(a => a.name === document.getElementById('archetypeSelect').value);
-  
+
   const primarySelectValue = document.getElementById('primarySelect').value;
-  const primaryWeaponName = primarySelectValue.split(' ')[0]; // Extract name before '('
+  const primaryWeaponName = getPrimaryWeaponNameFromDisplay(primarySelectValue);
   const primary = data.primaryWeapons.find(w => w.name === primaryWeaponName);
 
-  const secondarySelectElement = document.getElementById('secondarySelect'); // Get the element
+  const secondarySelectElement = document.getElementById('secondarySelect');
   let secondary = data.secondaryWeapons.find(w => w.name === secondarySelectElement.value) || null;
   const mount = data.mounts.find(m => m.name === document.getElementById('mountSelect').value) || null;
   const blessing = data.divineBlessings.find(b => b.name === document.getElementById('blessingSelect').value) || null;
@@ -177,11 +186,11 @@ function updateSummary() {
 
   // Enable/Disable Secondary Equipment based on Primary Weapon Handedness
   if (primary && primary.handedness === 'two') {
-    secondarySelectElement.value = 'None'; // Reset secondary if a two-handed weapon is chosen
-    secondarySelectElement.disabled = true;
+    secondarySelectElement.value = 'None'; // Set to None
+    secondarySelectElement.disabled = true; // Disable selection
     secondary = null; // Ensure secondary is null for calculation if disabled
   } else {
-    secondarySelectElement.disabled = false;
+    secondarySelectElement.disabled = false; // Re-enable if one-handed
   }
 
   // Archetype runemarks & effects
@@ -234,6 +243,7 @@ function updateSummary() {
     stats.D += (primary.modifiers.damageBonus || 0);
     stats.C += (primary.modifiers.critBonus || 0);
   }
+  // Only apply secondary modifiers if secondary is not null (i.e., not disabled)
   if (secondary && secondary.name !== 'None') {
     stats.T += (secondary.modifiers.toughnessBonus || 0);
     stats.A += (secondary.modifiers.attackBonus || 0);
@@ -251,6 +261,7 @@ function updateSummary() {
 
   // Points calculation
   let totalPoints = fighter.points + (archetype?.points || 0) + (primary?.points || 0);
+  // Only add secondary points if secondary is not null (i.e., not disabled)
   if (secondary && secondary.name !== 'None') totalPoints += secondary.points;
   if (mount && mount.name !== 'None') totalPoints += mount.points;
   if (blessing && blessing.name !== 'None') {
@@ -284,9 +295,9 @@ function updateSummary() {
 function saveBuild() {
   const selections = {};
   ['fighter', 'faction', 'archetype', 'primary', 'secondary', 'mount', 'blessing', 'runemark'].forEach(key => {
-    // For primary, save only the weapon name, not the handedness in brackets
     if (key === 'primary') {
-      selections[key] = document.getElementById(`${key}Select`).value.split(' ')[0];
+      // Save only the weapon name, not the handedness in brackets
+      selections[key] = getPrimaryWeaponNameFromDisplay(document.getElementById(`${key}Select`).value);
     } else {
       selections[key] = document.getElementById(`${key}Select`).value;
     }
@@ -332,7 +343,7 @@ function parseAndApplyBuild(lines) {
     'Fighter': 'fighterSelect',
     'Faction': 'factionSelect',
     'Archetype': 'archetypeSelect',
-    'Primary': 'primarySelect', // Will need special handling to match 'Name (Handedness)' format
+    'Primary': 'primarySelect',
     'Secondary': 'secondarySelect',
     'Mount': 'mountSelect',
     'Blessing': 'blessingSelect',
@@ -361,7 +372,7 @@ Fighter: ${document.getElementById('fighterSelect').value}
 Fighter Name: ${document.getElementById('fighterNameInput').value || 'Unnamed'}
 Faction: ${document.getElementById('factionSelect').value}
 Archetype: ${document.getElementById('archetypeSelect').value}
-Primary: ${document.getElementById('primarySelect').value.split(' ')[0]} // Export only the name
+Primary: ${getPrimaryWeaponNameFromDisplay(document.getElementById('primarySelect').value)}
 Secondary: ${document.getElementById('secondarySelect').value}
 Mount: ${document.getElementById('mountSelect').value}
 Blessing: ${document.getElementById('blessingSelect').value}
