@@ -99,7 +99,7 @@ function updateSummary() {
   let currentT = fighter.T;
   let currentW = fighter.W;
   let currentRunemarks = new Set(fighter.runemarks || []);
-  let fighterAttackProfiles = [];
+
 
   totalPoints += fighter.points;
   document.getElementById('fighterType').textContent = fighter.name;
@@ -192,35 +192,68 @@ function updateSummary() {
         fighter.A = Math.max(fighter.A, archetype.fighterEffects.meleeAttackMin);
       }
     }
-    // Handle Mage's special attack profile
-    if (archetype.name === 'Mage' && archetype.profile) {
-      const mageProfile = { ...archetype.profile
-      };
-      fighterAttackProfiles.push({
-        name: archetype.profile.name || 'Arcane Bolt',
-        profile: calculateWeaponProfile(mageProfile, fighter, null)
-      });
-    }
   }
 
 
-  // Apply Primary Weapon
+  // --- Attack Profile Generation ---
+  let fighterAttackProfiles = [];
   let primaryWeaponRequiresUnarmed = false;
+
+  // 1. Handle Primary Weapon profiles
   if (primaryWeapon) {
     totalPoints += primaryWeapon.points;
+
+    // Determine if primary weapon forces an unarmed profile despite having other attacks
+    if (primaryWeapon.fighterEffects && primaryWeapon.fighterEffects.unarmedInMelee) {
+      primaryWeaponRequiresUnarmed = true;
+    }
+
+    // A. Handle primary weapons that provide a *specific* 'profile' (e.g., a unique melee or ranged attack)
     if (primaryWeapon.profile) {
       fighterAttackProfiles.push({
         name: primaryWeapon.name,
         profile: calculateWeaponProfile(primaryWeapon.profile, fighter, primaryWeapon.effects)
       });
     }
-    if (primaryWeapon.fighterEffects && primaryWeapon.fighterEffects.unarmedInMelee) {
-      primaryWeaponRequiresUnarmed = true;
+    // B. Handle primary weapons that *add a ranged profile* (e.g., Shortbow, Handgun, Throwing Axe)
+    else if (primaryWeapon.addsRangedProfile) {
+      fighterAttackProfiles.push({
+        name: primaryWeapon.name,
+        profile: calculateWeaponProfile(primaryWeapon.addsRangedProfile, fighter, primaryWeapon.effects)
+      });
+    }
+    // C. Handle standard melee weapons (Hand Weapon, Spear, Halberd, Great Weapon)
+    // These modify the fighter's base melee stats, not add a new distinct profile.
+    else if (primaryWeapon.effects) { // Check for `effects` as an indicator of modifying base melee
+      const baseMeleeProfile = {
+        name: primaryWeapon.name, // Name after the primary weapon
+        range: [0, fighter.R], // Use fighter's reach for range 1
+        attacks: fighter.A,
+        strength: fighter.S,
+        damage: fighter.D,
+        crit: fighter.C,
+        weaponRunemark: "Melee" // Default melee runemark
+      };
+      fighterAttackProfiles.push({
+        name: primaryWeapon.name,
+        profile: calculateWeaponProfile(baseMeleeProfile, fighter, primaryWeapon.effects)
+      });
     }
   }
 
 
-  // Apply Secondary Equipment
+  // 2. Add Archetype (Mage) Profile
+  if (archetype.name === 'Mage' && archetype.profile) {
+    const mageProfile = { ...archetype.profile
+    };
+    fighterAttackProfiles.push({
+      name: archetype.profile.name || 'Arcane Bolt',
+      profile: calculateWeaponProfile(mageProfile, fighter, null)
+    });
+  }
+
+
+  // 3. Add Secondary Equipment Profile
   if (secondaryWeapon && secondarySelectElement.value !== 'None') {
     totalPoints += secondaryWeapon.points;
     if (secondaryWeapon.profile) {
@@ -228,7 +261,16 @@ function updateSummary() {
         name: secondaryWeapon.name,
         profile: calculateWeaponProfile(secondaryWeapon.profile, fighter, secondaryWeapon.effects)
       });
+    } else if (secondaryWeapon.addsRangedProfile) {
+      fighterAttackProfiles.push({
+        name: secondaryWeapon.name,
+        profile: calculateWeaponProfile(secondaryWeapon.addsRangedProfile, fighter, secondaryWeapon.effects)
+      });
     }
+    // Note: Secondary weapons with only fighterEffects (like Additional Hand Weapon)
+    // are assumed to modify overall fighter stats (which is handled at the top
+    // with currentMv, currentT, currentW) or modify an existing melee profile,
+    // which is not explicitly modeled as a separate attack profile for now.
     if (secondaryWeapon.fighterEffects) {
       currentMv += secondaryWeapon.fighterEffects.movementBonus || 0;
       currentT += secondaryWeapon.fighterEffects.toughnessBonus || 0;
@@ -236,7 +278,7 @@ function updateSummary() {
     }
   }
 
-  // Apply Mount
+  // 4. Add Mount Profile
   if (mount && mountSelectElement.value !== 'None') {
     totalPoints += mount.points;
     if (mount.runemarksAdded) {
@@ -258,8 +300,42 @@ function updateSummary() {
     }
   }
 
+  // Filter out any potential empty or invalid profiles
+  fighterAttackProfiles = fighterAttackProfiles.filter(ap => ap && ap.profile);
+  // Ensure uniqueness by name to avoid displaying duplicate profiles if logic somehow adds them
+  const uniqueAttackProfiles = new Map();
+  fighterAttackProfiles.forEach(ap => uniqueAttackProfiles.set(ap.name, ap));
+  fighterAttackProfiles = Array.from(uniqueAttackProfiles.values());
 
-  // Apply Divine Blessing
+
+  // 5. Unarmed Profile Generation (FINAL CHECK AFTER ALL WEAPONS/ARCHETYPES ADDED)
+  let hasAnyMeleeProfile = fighterAttackProfiles.some(ap => ap.profile.range[0] === 0);
+
+  if (!hasAnyMeleeProfile || primaryWeaponRequiresUnarmed) {
+    const unarmedProfile = {
+      name: 'Unarmed',
+      range: [0, 1],
+      attacks: Math.max(rules.unarmedPenalties.minimumValues.attacks, fighter.A + rules.unarmedPenalties.attackPenalty),
+      strength: Math.max(rules.unarmedPenalties.minimumValues.strength, fighter.S + rules.unarmedPenalties.strengthPenalty),
+      damage: Math.max(rules.unarmedPenalties.minimumValues.damage, fighter.D + rules.unarmedPenalties.damagePenalty),
+      crit: Math.max(rules.unarmedPenalties.minimumValues.crit, fighter.C + rules.unarmedPenalties.critPenalty),
+      weaponRunemark: "Fist"
+    };
+
+    // Remove any existing 'Unarmed' profile before potentially adding it
+    fighterAttackProfiles = fighterAttackProfiles.filter(ap => ap.name !== 'Unarmed');
+
+    // Add unarmed if necessary
+    if (!hasAnyMeleeProfile || primaryWeaponRequiresUnarmed) {
+      fighterAttackProfiles.unshift(unarmedProfile); // Add to beginning for prominence
+    }
+  } else {
+    // If a melee weapon is present and unarmed is not required, ensure 'Unarmed' profile is removed if it exists
+    fighterAttackProfiles = fighterAttackProfiles.filter(ap => ap.name !== 'Unarmed');
+  }
+
+
+  // Apply Divine Blessing weapon effects (after all profiles are definitively in fighterAttackProfiles)
   let blessingEffectText = 'None';
   if (blessing && document.getElementById('blessingSelect').value !== 'None') {
     const blessingPoints = currentW < 23 ? blessing.pointsLow : blessing.pointsHigh;
@@ -271,10 +347,8 @@ function updateSummary() {
       currentW += blessing.fighterEffects.woundsBonus || 0;
     }
     if (blessing.weaponEffect) {
-      // Apply weapon effect to the targeted weapon profile
       const targetProfileType = blessing.targetProfile;
       fighterAttackProfiles.forEach(ap => {
-        // Apply only if the profile matches the target type (e.g., 'melee' or 'any')
         const isMelee = ap.profile.range[0] === 0;
         if (targetProfileType === 'any' || (targetProfileType === 'melee' && isMelee)) {
           ap.profile.attacks += blessing.weaponEffect.attackBonus || 0;
@@ -318,39 +392,6 @@ function updateSummary() {
   }
 
   // --- Post-calculation validations and adjustments ---
-
-  // Unarmed Profile Generation
-  let hasEquippedMeleeWeapon = fighterAttackProfiles.some(ap => ap.profile.range[0] === 0);
-
-  // If no equipped melee weapon OR the primary weapon makes the fighter count as unarmed in melee
-  if (!hasEquippedMeleeWeapon || primaryWeaponRequiresUnarmed) {
-    const unarmedProfile = {
-      name: 'Unarmed',
-      range: [0, 1],
-      attacks: Math.max(rules.unarmedPenalties.minimumValues.attacks, fighter.A + rules.unarmedPenalties.attackPenalty),
-      strength: Math.max(rules.unarmedPenalties.minimumValues.strength, fighter.S + rules.unarmedPenalties.strengthPenalty),
-      damage: Math.max(rules.unarmedPenalties.minimumValues.damage, fighter.D + rules.unarmedPenalties.damagePenalty),
-      crit: Math.max(rules.unarmedPenalties.minimumValues.crit, fighter.C + rules.unarmedPenalties.critPenalty),
-      weaponRunemark: "Fist"
-    };
-
-    // Add unarmed profile only if it's not already covered by another 0-range attack
-    // or if explicitly required by primary weapon (overriding other melee options)
-    let shouldAddUnarmed = true;
-    if (hasEquippedMeleeWeapon && !primaryWeaponRequiresUnarmed) {
-      shouldAddUnarmed = false; // Only add if no other melee weapon AND not forced by primary weapon
-    }
-
-    if (shouldAddUnarmed) {
-      // Remove any existing 'Unarmed' profile to prevent duplicates on successive updates
-      fighterAttackProfiles = fighterAttackProfiles.filter(ap => ap.name !== 'Unarmed');
-      fighterAttackProfiles.unshift(unarmedProfile); // Add to beginning for prominence
-    }
-  } else {
-    // If a melee weapon is present and unarmed is not required, ensure 'Unarmed' profile is removed if it exists
-    fighterAttackProfiles = fighterAttackProfiles.filter(ap => ap.name !== 'Unarmed');
-  }
-
 
   // Max Attack Actions Validation
   if (fighterAttackProfiles.length > rules.maxAttackActions) {
