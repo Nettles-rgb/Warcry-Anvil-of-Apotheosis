@@ -3,102 +3,66 @@
     "name": "Shield",
     "points": 5,
     "modifiers": {
-      "toughnessBonus": 1,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+      "toughnessBonus": 1
+    }
   },
   {
     "name": "Bow",
     "points": 45,
-    "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": {
+    "profile": {
+      "name": "Bow",
+      "type": "Ranged",
       "range": [3, 15],
       "attacks": 2,
       "strength": "baseStrength",
       "damage": 1,
       "crit": 3
-    },
-    "notes": []
+    }
   },
   {
     "name": "Additional Hand Weapon",
     "points": 10,
     "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 1,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": ["Applies bonus to melee profile only"]
+      "attackBonus": 1
+    }
   },
   {
     "name": "Pistol",
     "points": 20,
-    "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": {
+    "profile": {
+      "name": "Pistol",
+      "type": "Ranged",
       "range": [0, 8],
       "attacks": 2,
       "strength": 4,
       "damage": 1,
       "crit": 3
-    },
-    "notes": []
+    }
   },
   {
     "name": "Throwing Daggers",
     "points": 20,
-    "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": {
+    "profile": {
+      "name": "Throwing Daggers",
+      "type": "Ranged",
       "range": [0, 8],
       "attacks": 3,
       "strength": 3,
       "damage": 1,
       "crit": 2
-    },
-    "notes": []
+    }
   },
   {
     "name": "Sling",
     "points": 5,
-    "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": {
+    "profile": {
+      "name": "Sling",
+      "type": "Ranged",
       "range": [0, 8],
       "attacks": 2,
       "strength": 2,
       "damage": 1,
       "crit": 2
-    },
-    "notes": []
+    }
   }
 ]
