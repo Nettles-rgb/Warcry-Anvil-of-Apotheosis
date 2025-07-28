@@ -54,7 +54,7 @@
     "points": 20,
     "handedness": "one",
     "profile": {
-      "range": [8, 8],
+      "range": [0, 8],
       "attacks": 2,
       "strength": 4,
       "damage": 1,
@@ -74,7 +74,7 @@
     "points": 20,
     "handedness": "one",
     "profile": {
-      "range": [8, 8],
+      "range": [0, 8],
       "attacks": 3,
       "strength": 3,
       "damage": 1,
@@ -94,7 +94,7 @@
     "points": 5,
     "handedness": "one",
     "profile": {
-      "range": [8, 8],
+      "range": [0, 8],
       "attacks": 2,
       "strength": 2,
       "damage": 1,
