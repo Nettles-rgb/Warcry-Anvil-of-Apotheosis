@@ -1,32 +1,36 @@
 [
   {
     "name": "Swiftness",
-    "effect": { "movementBonus": 1 },
-    "description": "Add 1 to the Move characteristic of this fighter.",
+    "fighterEffects": {
+      "movementBonus": 1
+    },
     "pointsLow": 15,
     "pointsHigh": 25,
     "targetable": false
   },
   {
     "name": "Resilience",
-    "effect": { "toughnessBonus": 1 },
-    "description": "Add 1 to the Toughness characteristic of this fighter.",
+    "fighterEffects": {
+      "toughnessBonus": 1
+    },
     "pointsLow": 15,
     "pointsHigh": 20,
     "targetable": false
   },
   {
     "name": "Fortitude",
-    "effect": { "woundsBonus": 4 },
-    "description": "Add 4 to the Wounds characteristic of this fighter.",
+    "fighterEffects": {
+      "woundsBonus": 4
+    },
     "pointsLow": 15,
     "pointsHigh": 15,
     "targetable": false
   },
   {
     "name": "Ferocity",
-    "effect": { "attackBonus": 1 },
-    "description": "Add 1 to the Attacks characteristic of one of this fighter's melee weapons.",
+    "weaponEffect": {
+      "attackBonus": 1
+    },
     "pointsLow": 25,
     "pointsHigh": 30,
     "targetable": true,
@@ -34,8 +38,9 @@
   },
   {
     "name": "Might",
-    "effect": { "strengthBonus": 1 },
-    "description": "Add 1 to the Strength characteristic of one of this fighter's weapons.",
+    "weaponEffect": {
+      "strengthBonus": 1
+    },
     "pointsLow": 15,
     "pointsHigh": 20,
     "targetable": true,
@@ -43,8 +48,9 @@
   },
   {
     "name": "Brutality",
-    "effect": { "damageBonus": 1 },
-    "description": "Add 1 to the first Damage characteristic of one of this fighter's melee weapons.",
+    "weaponEffect": {
+      "damageBonus": 1
+    },
     "pointsLow": 25,
     "pointsHigh": 30,
     "targetable": true,
@@ -52,8 +58,9 @@
   },
   {
     "name": "Savagery",
-    "effect": { "critBonus": 1 },
-    "description": "Add 1 to the second Damage characteristic of one of this fighter's melee weapons.",
+    "weaponEffect": {
+      "critBonus": 1
+    },
     "pointsLow": 10,
     "pointsHigh": 10,
     "targetable": true,
@@ -61,7 +68,7 @@
   },
   {
     "name": "Heroism",
-    "effect": { "special": "Can use the 'Inspiring Presence' ability as if the fighter had the Hero runemark." },
+    "specialEffect": "Can use the 'Inspiring Presence' ability as if the fighter had the Hero (Hero) runemark.",
     "description": "Can use the 'Inspiring Presence' ability as if the fighter had the Hero (Hero) runemark.",
     "pointsLow": 10,
     "pointsHigh": 10,
@@ -69,7 +76,7 @@
   },
   {
     "name": "Spite",
-    "effect": { "special": "Make up to one 'free' reaction per battle round as if spending a level of renown." },
+    "specialEffect": "Make up to one 'free' reaction per battle round as if spending a level of renown.",
     "description": "Make up to one 'free' reaction per battle round as if spending a level of renown.",
     "pointsLow": 30,
     "pointsHigh": 30,
@@ -77,7 +84,7 @@
   },
   {
     "name": "Destiny",
-    "effect": { "special": "Begin the battle with one saved wild dice." },
+    "specialEffect": "Begin the battle with one saved wild dice.",
     "description": "Begin the battle with one saved wild dice.",
     "pointsLow": 40,
     "pointsHigh": 40,
