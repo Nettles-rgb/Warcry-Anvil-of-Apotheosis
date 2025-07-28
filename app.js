@@ -14,11 +14,12 @@ async function init() {
   }
   rules = data.rules;
   populateSelections();
+  updateSummary(); // Initial summary update
 }
 
 function populateSelections() {
   fillSelect('fighterSelect', data.fighters.map(f => f.name));
-  fillSelect('archetypeSelect', data.archetypes.map(a => a.name)); // Removed 'None'
+  fillSelect('archetypeSelect', ['None'].concat(data.archetypes.map(a => a.name)));
   fillSelect('mountSelect', ['None'].concat(data.mounts.map(m => m.name)));
   fillSelect('runemarkSelect', ['None'].concat(data.extraRunemarks.map(r => r.name)));
 
@@ -30,401 +31,419 @@ function populateSelections() {
 
 
   document.getElementById('fighterSelect').addEventListener('change', updateFactionOptions);
-  document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', updateSummary));
-  updateFactionOptions(); // Initial call to set up dynamic options
+  document.querySelectorAll('select').forEach(select => {
+    select.addEventListener('change', updateSummary);
+  });
+  document.getElementById('fighterNameInput').addEventListener('input', updateSummary);
+
+  updateFactionOptions(); // Call once to set initial faction options
 }
 
-function fillSelect(id, options) {
-  const sel = document.getElementById(id);
-  sel.innerHTML = options.map(o => `<option>${o}</option>`).join('');
+function fillSelect(selectId, options) {
+  const select = document.getElementById(selectId);
+  select.innerHTML = '';
+  options.forEach(optionText => {
+    const option = document.createElement('option');
+    option.textContent = optionText;
+    option.value = optionText;
+    select.appendChild(option);
+  });
 }
 
 function updateFactionOptions() {
-  const fighterName = document.getElementById('fighterSelect').value;
-  const fighter = data.fighters.find(f => f.name === fighterName);
-  fillSelect('factionSelect', fighter.factionRunemarks);
-  updateSummary();
+  const selectedFighterName = document.getElementById('fighterSelect').value;
+  const selectedFighter = data.fighters.find(f => f.name === selectedFighterName);
+  const factionSelect = document.getElementById('factionSelect');
+
+  factionSelect.innerHTML = ''; // Clear existing options
+
+  if (selectedFighter && selectedFighter.factionRunemarks && selectedFighter.factionRunemarks.length > 0) {
+    fillSelect('factionSelect', selectedFighter.factionRunemarks);
+  } else {
+    // If no specific faction runemarks, allow a "None" option or a generic one
+    fillSelect('factionSelect', ['None']);
+  }
+  updateSummary(); // Update summary after faction changes
 }
 
-// Helper function to extract the base weapon name from its display string
+
 function getPrimaryWeaponNameFromDisplay(displayString) {
-  const index = displayString.indexOf(' (');
-  if (index !== -1) {
-    return displayString.substring(0, index);
-  }
-  return displayString; // Fallback if no handedness in brackets
+  const match = displayString.match(/(.*) \((?:One|Two)-handed\)/);
+  return match ? match[1] : displayString;
 }
 
-function validateBuild(runemarks, profiles, fighter, archetype, mount) {
-  const messages = [];
-
-  // Note: Archetype, Mount, and Duplicate Runemark validation messages
-  // are largely prevented by UI filtering now, but kept here for robustness.
-
-  // Runemark cap (excluding faction runemark)
-  if (runemarks.length > rules.maxRunemarks) {
-    messages.push(`Too many runemarks (max ${rules.maxRunemarks}, excluding faction).`);
-  }
-
-  // Attack action cap
-  if (profiles.length > rules.maxAttackActions) {
-    messages.push(`Too many attack profiles (max ${rules.maxAttackActions}).`);
-  }
-
-  // Secondary weapon restrictions
-  const primarySelectValue = document.getElementById('primarySelect').value;
-  const primaryWeaponName = getPrimaryWeaponNameFromDisplay(primarySelectValue);
-  const primary = data.primaryWeapons.find(w => w.name === primaryWeaponName);
-  const secondary = document.getElementById('secondarySelect').value;
-
-  if (secondary !== 'None' && primary?.handedness !== 'one') {
-    messages.push(`Secondary weapon only allowed with one-handed primary weapons.`);
-  }
-
-  return messages;
-}
-
-function buildProfiles(stats, fighter, primary, secondary, archetype) {
-  const profiles = [];
-
-  // Base melee profile (with reach)
-  let meleeProfile = {
-    type: 'Melee',
-    range: [fighter.R + (primary.modifiers?.rangeBonus || 0), fighter.R + (primary.modifiers?.rangeBonus || 0)],
-    attacks: stats.A,
-    strength: stats.S,
-    damage: stats.D,
-    crit: stats.C
-  };
-
-  // Handle unarmed or replaced melee
-  if (primary.notes.includes('Fighter counts as unarmed in melee')) {
-    meleeProfile.attacks = Math.max(meleeProfile.attacks + rules.unarmedPenalties.attackPenalty, rules.unarmedPenalties.minimumValues.attacks);
-    meleeProfile.damage = Math.max(meleeProfile.damage + rules.unarmedPenalties.damagePenalty, rules.unarmedPenalties.minimumValues.damage);
-    meleeProfile.crit = Math.max(meleeProfile.crit + rules.unarmedPenalties.critPenalty, rules.unarmedPenalties.minimumValues.crit);
-  }
-  if (primary.notes.includes('Replaces melee profile entirely')) {
-    meleeProfile = null;
-  }
-  if (meleeProfile) profiles.push(meleeProfile);
-
-  // Add ranged profiles from weapons
-  if (primary.addsRangedProfile) {
-    profiles.push(resolveRangedProfile(primary.addsRangedProfile, stats, primary.modifiers));
-  }
-  if (secondary && secondary.addsRangedProfile) {
-    profiles.push(resolveRangedProfile(secondary.addsRangedProfile, stats, secondary.modifiers));
-  }
-
-  // Archetype special attacks (Mage)
-  if (archetype && archetype.attackProfile) {
-    profiles.push(resolveRangedProfile(archetype.attackProfile, stats));
-  }
-
-  return profiles;
-}
-
-function resolveRangedProfile(profile, stats, modifiers = {}) {
-  const p = { ...profile, type: 'Ranged' };
-
-  // Handle base stat substitutions
-  if (p.strength === 'baseStrength') {
-    p.strength = stats.S;
-  }
-  if (p.attacks === 'baseAttacks') {
-    p.attacks = stats.A;
-  }
-  if (p.damage === 'baseDamage') {
-    p.damage = stats.D;
-  }
-  if (p.crit === 'baseCrit') {
-    p.crit = stats.C;
-  }
-
-  // Apply weapon modifiers to the profile
-  if (modifiers.attackBonus) p.attacks += modifiers.attackBonus;
-  if (modifiers.strengthBonus) p.strength += modifiers.strengthBonus;
-  if (modifiers.damageBonus) p.damage += modifiers.damageBonus;
-  if (modifiers.critBonus) p.crit += modifiers.critBonus;
-
-  return p;
-}
 
 function updateSummary() {
-  const fighterSelectElement = document.getElementById('fighterSelect');
-  const archetypeSelectElement = document.getElementById('archetypeSelect');
-  const mountSelectElement = document.getElementById('mountSelect');
-  const secondarySelectElement = document.getElementById('secondarySelect');
-  const runemarkSelectElement = document.getElementById('runemarkSelect');
-  const factionSelectElement = document.getElementById('factionSelect');
+  let totalPoints = 0;
+  let validationMessages = [];
+  const selectedFighterName = document.getElementById('fighterSelect').value;
+  const fighter = data.fighters.find(f => f.name === selectedFighterName);
 
-  const fighter = data.fighters.find(f => f.name === fighterSelectElement.value);
-  const faction = factionSelectElement.value; // Get current faction for filtering
-
-  // Store current selections to attempt to re-select them after filtering
-  const currentArchetypeValue = archetypeSelectElement.value;
-  const currentMountValue = mountSelectElement.value;
-  const currentRunemarkValue = runemarkSelectElement.value;
-
-  let allValidationMessages = [];
-
-  // --- Dynamic Filtering of Dropdowns ---
-
-  // 1. Filter Archetypes based on Fighter and Faction
-  const validArchetypes = data.archetypes.filter(a => {
-    const isForbiddenByFighter = a.restrictions.forbiddenFighters.includes(fighter.name);
-    const isForbiddenByFaction = a.restrictions.forbiddenFactions.some(f => faction.includes(f)); // Check if selected faction is among forbidden ones
-    return !isForbiddenByFighter && !isForbiddenByFaction;
-  });
-  fillSelect('archetypeSelect', validArchetypes.map(a => a.name)); // Removed 'None' here
-
-  // Try to re-select, otherwise default to 'Commander'
-  if (validArchetypes.some(a => a.name === currentArchetypeValue)) {
-    archetypeSelectElement.value = currentArchetypeValue;
-  } else {
-    archetypeSelectElement.value = 'Commander'; // Always default to Commander if current is invalid
+  if (!fighter) {
+    document.getElementById('validationMessages').textContent = 'Please select a fighter.';
+    return;
   }
 
-  // 2. Filter Mounts based on Fighter
-  const validMounts = data.mounts.filter(m => {
-    const isForbiddenByFighter = m.restrictions.forbiddenFighters.includes(fighter.name);
-    return !isForbiddenByFighter;
-  });
-  fillSelect('mountSelect', ['None'].concat(validMounts.map(m => m.name)));
-  // Try to re-select, otherwise default to 'None'
-  if (validMounts.some(m => m.name === currentMountValue)) {
-    mountSelectElement.value = currentMountValue;
-  } else {
-    mountSelectElement.value = 'None';
-  }
+  // Base Stats from Fighter
+  let currentMv = fighter.Mv;
+  let currentT = fighter.T;
+  let currentW = fighter.W;
+  let currentRunemarks = new Set(fighter.runemarks || []);
+  let fighterAttackProfiles = [];
 
-  // --- Retrieve finalized selections after potential resets ---
-  let archetype = data.archetypes.find(a => a.name === archetypeSelectElement.value);
-  let mount = data.mounts.find(m => m.name === mountSelectElement.value) || null;
-
-  const primarySelectValue = document.getElementById('primarySelect').value;
-  const primaryWeaponName = getPrimaryWeaponNameFromDisplay(primarySelectValue);
-  const primary = data.primaryWeapons.find(w => w.name === primaryWeaponName);
-
-  let secondary = data.secondaryWeapons.find(w => w.name === secondarySelectElement.value) || null;
-  const blessing = data.divineBlessings.find(b => b.name === document.getElementById('blessingSelect').value) || null;
-  // extraRunemark will be handled after runemarks are compiled
-
-  let stats = { Mv: fighter.Mv, T: fighter.T, W: fighter.W, S: fighter.S, A: fighter.A, D: fighter.D, C: fighter.C };
-  let runemarks = [...fighter.runemarks]; // Start with fighter's runemarks
-
-  // Apply Archetype effects (if archetype is now valid or None)
-  if (archetype) {
-    if (archetype.effects.includes('gain runemark: Mystic')) runemarks.push('Mystic');
-    if (archetype.effects.includes('gain runemark: Priest')) runemarks.push('Priest');
-    if (archetype.effects.some(e => e.includes('-1 melee attack'))) {
-      stats.A = Math.max(stats.A - 1, 1);
-    }
-  }
-
-  // Apply Mount effects (if mount is now valid or None)
-  if (mount && mount.name !== 'None') {
-    stats.Mv += mount.modifiers.movementBonus;
-    stats.W += mount.modifiers.woundsBonus;
-    stats.A += mount.modifiers.attackBonus;
-    stats.T += mount.modifiers.toughnessBonus;
-    if (fighter.name !== 'Malignant') runemarks.push(...mount.runemarksAdded);
-    if (mount.restrictions.maxMovement) {
-      stats.Mv = Math.min(stats.Mv, mount.restrictions.maxMovement);
-    }
-  }
-
-  // Secondary Weapon Disable/Reset (existing logic)
-  if (primary && primary.handedness === 'two') {
-    if (secondarySelectElement.value !== 'None') {
-      secondarySelectElement.value = 'None';
-      secondary = null;
-    }
-    secondarySelectElement.disabled = true;
-  } else {
-    secondarySelectElement.disabled = false;
-  }
-
-  // Blessing
-  let blessingEffectText = 'None';
-  if (blessing && blessing.name !== 'None') {
-    blessingEffectText = blessing.effect.special || JSON.stringify(blessing.effect);
-    const e = blessing.effect;
-    if (e.movementBonus) stats.Mv += e.movementBonus;
-    if (e.toughnessBonus) stats.T += e.toughnessBonus;
-    if (e.woundsBonus) stats.W += e.woundsBonus;
-    if (e.attackBonus) stats.A += e.attackBonus;
-    if (e.strengthBonus) stats.S += e.strengthBonus;
-    if (e.damageBonus) stats.D += e.damageBonus;
-    if (e.critBonus) stats.C += e.critBonus;
-  }
-
-  // 3. Filter Additional Runemarks based on accumulated runemarks (including faction)
-  const allCurrentRunemarks = [...new Set([...runemarks, faction])]; // Combine unique runemarks and faction
-  const validExtraRunemarks = data.extraRunemarks.filter(r => {
-    // If an extra runemark has a 'cannotBeMounted' restriction, and a mount is selected, it's invalid.
-    if (mount && mount.name !== 'None' && r.restrictions.cannotBeMounted) {
-      return false;
-    }
-    // Only include if not already present
-    return !allCurrentRunemarks.includes(r.name);
-  });
-  fillSelect('runemarkSelect', ['None'].concat(validExtraRunemarks.map(r => r.name)));
-  // Try to re-select, otherwise default to 'None'
-  if (validExtraRunemarks.some(r => r.name === currentRunemarkValue)) {
-    runemarkSelectElement.value = currentRunemarkValue;
-  } else {
-    runemarkSelectElement.value = 'None';
-  }
-  let extraRunemark = data.extraRunemarks.find(r => r.name === runemarkSelectElement.value) || null;
-
-
-  // Primary/secondary mods
-  if (primary.modifiers) {
-    stats.A += (primary.modifiers.attackBonus || 0);
-    stats.S += (primary.modifiers.strengthBonus || 0);
-    stats.D += (primary.modifiers.damageBonus || 0);
-    stats.C += (primary.modifiers.critBonus || 0);
-  }
-  if (secondary && secondary.name !== 'None') {
-    stats.T += (secondary.modifiers.toughnessBonus || 0);
-    stats.A += (secondary.modifiers.attackBonus || 0);
-  }
-
-  // Build profiles
-  const profiles = buildProfiles(stats, fighter, primary, secondary, archetype);
-
-  // Validate the build and collect messages from validateBuild function
-  const coreValidationMessages = validateBuild(runemarks, profiles, fighter, archetype, mount);
-  allValidationMessages = allValidationMessages.concat(coreValidationMessages);
-
-  // Display all validation messages
-  document.getElementById('validationMessages').innerHTML = allValidationMessages.join('<br>');
-
-  // Points calculation
-  let totalPoints = fighter.points + (archetype?.points || 0) + (primary?.points || 0);
-  if (secondary && secondary.name !== 'None') totalPoints += secondary.points;
-  if (mount && mount.name !== 'None') totalPoints += mount.points;
-  if (blessing && blessing.name !== 'None') {
-    totalPoints += stats.W >= 23 ? blessing.pointsHigh : blessing.pointsLow;
-  }
-  if (extraRunemark && extraRunemark.name !== 'None') totalPoints += extraRunemark.points;
-
-  // Display - Updated to remove S, A, D stats and only show Mv, T, W
+  totalPoints += fighter.points;
   document.getElementById('fighterType').textContent = fighter.name;
   document.getElementById('fighterName').textContent = document.getElementById('fighterNameInput').value || 'Unnamed';
-  document.getElementById('runemarkDisplay').textContent = [...new Set([...runemarks, faction, (extraRunemark ? extraRunemark.name : '')].filter(Boolean))].join(', ') || '-'; // Display unique runemarks including faction and extra (if any)
-  document.getElementById('factionRunemarkDisplay').textContent = faction;
-  document.getElementById('statMv').textContent = stats.Mv;
-  document.getElementById('statT').textContent = stats.T;
-  document.getElementById('statW').textContent = stats.W;
-  document.getElementById('blessingEffect').textContent = blessingEffectText;
+  document.getElementById('factionRunemarkDisplay').textContent = document.getElementById('factionSelect').value;
+
+
+  // Apply Archetype
+  const selectedArchetypeName = document.getElementById('archetypeSelect').value;
+  const archetype = data.archetypes.find(a => a.name === selectedArchetypeName);
+  if (archetype && selectedArchetypeName !== 'None') {
+    totalPoints += archetype.points;
+    if (archetype.runemarksAdded) {
+      archetype.runemarksAdded.forEach(rm => currentRunemarks.add(rm));
+    }
+    if (archetype.fighterEffects) {
+      currentMv += archetype.fighterEffects.movementBonus || 0;
+      currentT += archetype.fighterEffects.toughnessBonus || 0;
+      currentW += archetype.fighterEffects.woundsBonus || 0;
+    }
+    // Handle Mage's special attack profile
+    if (archetype.name === 'Mage' && archetype.profile) {
+      const mageProfile = { ...archetype.profile };
+      fighterAttackProfiles.push({ name: 'Arcane Bolt', profile: calculateWeaponProfile(mageProfile, fighter, null) });
+    }
+  }
+
+
+  // Apply Primary Weapon
+  const selectedPrimaryWeaponDisplay = document.getElementById('primarySelect').value;
+  const primaryWeaponName = getPrimaryWeaponNameFromDisplay(selectedPrimaryWeaponDisplay);
+  const primaryWeapon = data.primaryWeapons.find(w => w.name === primaryWeaponName);
+  let primaryWeaponAddsAttack = false;
+  let primaryWeaponIsMelee = false; // Track if primary weapon is a 0 range melee
+  let primaryWeaponRequiresUnarmed = false;
+
+  if (primaryWeapon) {
+    totalPoints += primaryWeapon.points;
+    if (primaryWeapon.profile) {
+      fighterAttackProfiles.push({ name: primaryWeapon.name, profile: calculateWeaponProfile(primaryWeapon.profile, fighter, primaryWeapon.effects) });
+      primaryWeaponAddsAttack = true;
+      if (primaryWeapon.profile.range[0] === 0) {
+        primaryWeaponIsMelee = true;
+      }
+    }
+    if (primaryWeapon.fighterEffects && primaryWeapon.fighterEffects.unarmedInMelee) {
+      primaryWeaponRequiresUnarmed = true;
+    }
+  }
+
+
+  // Apply Secondary Equipment
+  const selectedSecondaryWeaponName = document.getElementById('secondarySelect').value;
+  const secondaryWeapon = data.secondaryWeapons.find(w => w.name === selectedSecondaryWeaponName);
+  let secondaryWeaponAddsAttack = false;
+
+  if (secondaryWeapon && selectedSecondaryWeaponName !== 'None') {
+    totalPoints += secondaryWeapon.points;
+    if (secondaryWeapon.profile) {
+      fighterAttackProfiles.push({ name: secondaryWeapon.name, profile: calculateWeaponProfile(secondaryWeapon.profile, fighter, secondaryWeapon.effects) });
+      secondaryWeaponAddsAttack = true;
+    }
+    if (secondaryWeapon.fighterEffects) {
+      currentMv += secondaryWeapon.fighterEffects.movementBonus || 0;
+      currentT += secondaryWeapon.fighterEffects.toughnessBonus || 0;
+      currentW += secondaryWeapon.fighterEffects.woundsBonus || 0;
+    }
+  }
+
+  // Apply Mount
+  const selectedMountName = document.getElementById('mountSelect').value;
+  const mount = data.mounts.find(m => m.name === selectedMountName);
+  if (mount && selectedMountName !== 'None') {
+    totalPoints += mount.points;
+    if (mount.runemarksAdded) {
+      // Malignant restriction for Mounted runemark
+      if (!(mount.runemarksAdded.includes('Mounted') && fighter.factionRunemarks.includes('Malignant'))) {
+        mount.runemarksAdded.forEach(rm => currentRunemarks.add(rm));
+      }
+    }
+    if (mount.fighterEffects) {
+      currentMv += mount.fighterEffects.movementBonus || 0;
+      currentT += mount.fighterEffects.toughnessBonus || 0;
+      currentW += mount.fighterEffects.woundsBonus || 0;
+    }
+    if (mount.profile) {
+      fighterAttackProfiles.push({ name: mount.profile.name, profile: calculateWeaponProfile(mount.profile, fighter, mount.effects) });
+    }
+  }
+
+
+  // Apply Divine Blessing
+  const selectedBlessingName = document.getElementById('blessingSelect').value;
+  const blessing = data.divineBlessings.find(b => b.name === selectedBlessingName);
+  if (blessing && selectedBlessingName !== 'None') {
+    const blessingPoints = currentW < 23 ? blessing.pointsLow : blessing.pointsHigh;
+    totalPoints += blessingPoints;
+
+    if (blessing.fighterEffects) {
+      currentMv += blessing.fighterEffects.movementBonus || 0;
+      currentT += blessing.fighterEffects.toughnessBonus || 0;
+      currentW += blessing.fighterEffects.woundsBonus || 0;
+    }
+    if (blessing.weaponEffect) {
+      // Apply weapon effect to the targeted weapon profile
+      const targetProfileType = blessing.targetProfile;
+      fighterAttackProfiles.forEach(ap => {
+        const weaponRunemark = ap.profile.weaponRunemark;
+        if (targetProfileType === 'any' || (targetProfileType === 'melee' && ap.profile.range[0] === 0)) {
+          ap.profile.attacks += blessing.weaponEffect.attackBonus || 0;
+          ap.profile.strength += blessing.weaponEffect.strengthBonus || 0;
+          ap.profile.damage += blessing.weaponEffect.damageBonus || 0;
+          ap.profile.crit += blessing.weaponEffect.critBonus || 0;
+        }
+      });
+    }
+  }
+
+
+  // Apply Additional Runemark
+  const selectedRunemarkName = document.getElementById('runemarkSelect').value;
+  if (selectedRunemarkName !== 'None') {
+    const extraRunemark = data.extraRunemarks.find(r => r.name === selectedRunemarkName);
+    if (extraRunemark) {
+      totalPoints += extraRunemark.points;
+      currentRunemarks.add(extraRunemark.name);
+    }
+  }
+
+  // --- Post-calculation validations and adjustments ---
+
+  // Unarmed Profile Generation
+  let hasMeleeWeapon = false;
+  if (primaryWeapon && primaryWeapon.profile && primaryWeapon.profile.range[0] === 0 && !primaryWeaponRequiresUnarmed) {
+    hasMeleeWeapon = true;
+  }
+  if (secondaryWeapon && secondaryWeapon.profile && secondaryWeapon.profile.range[0] === 0) { // Check if secondary is also a melee weapon
+    hasMeleeWeapon = true;
+  }
+  if (mount && mount.profile && mount.profile.range[0] === 0) { // Check if mount attack is a melee weapon
+    hasMeleeWeapon = true;
+  }
+  if (!hasMeleeWeapon || primaryWeaponRequiresUnarmed) {
+    const unarmedProfile = {
+      range: [0, 1],
+      attacks: Math.max(rules.unarmedPenalties.minimumValues.attacks, fighter.A + rules.unarmedPenalties.attackPenalty),
+      strength: Math.max(rules.unarmedPenalties.minimumValues.strength, fighter.S + rules.unarmedPenalties.strengthPenalty), // Assuming strength penalty if exists
+      damage: Math.max(rules.unarmedPenalties.minimumValues.damage, fighter.D + rules.unarmedPenalties.damagePenalty),
+      crit: Math.max(rules.unarmedPenalties.minimumValues.crit, fighter.C + rules.unarmedPenalties.critPenalty),
+      weaponRunemark: "Fist"
+    };
+    // Ensure "unarmed" profile is only added if no other melee weapon is present, or if the primary explicitly makes the fighter unarmed in melee.
+    let meleeAttackExists = fighterAttackProfiles.some(ap => ap.profile.range[0] === 0);
+    if (!meleeAttackExists || primaryWeaponRequiresUnarmed) {
+      fighterAttackProfiles.unshift({ name: 'Unarmed', profile: unarmedProfile }); // Add to beginning for prominence
+    }
+  }
+
+
+  // Max Attack Actions Validation
+  if (fighterAttackProfiles.length > rules.maxAttackActions) {
+    validationMessages.push(`Warning: A fighter can have a maximum of ${rules.maxAttackActions} attack actions. This fighter has ${fighterAttackProfiles.length}.`);
+  }
+
+  // Max Runemarks Validation
+  if (currentRunemarks.size > rules.maxRunemarks) {
+    validationMessages.push(`Warning: A fighter can have a maximum of ${rules.maxRunemarks} runemarks. This fighter has ${currentRunemarks.size}.`);
+  }
+
+  // Secondary Weapon Handedness Restriction
+  if (secondaryWeapon && selectedSecondaryWeaponName !== 'None' && rules.secondaryWeaponRequiresOneHanded) {
+    if (primaryWeapon && primaryWeapon.handedness === 'two') {
+      validationMessages.push('Warning: A secondary equipment can only be taken if the primary weapon is one-handed.');
+    }
+  }
+
+  // Update Display
+  document.getElementById('statMv').textContent = currentMv;
+  document.getElementById('statT').textContent = currentT;
+  document.getElementById('statW').textContent = currentW;
+  document.getElementById('runemarkDisplay').textContent = Array.from(currentRunemarks).join(', ');
+
+  const attackProfilesUl = document.getElementById('attackProfiles');
+  attackProfilesUl.innerHTML = '';
+  fighterAttackProfiles.forEach(ap => {
+    const li = document.createElement('li');
+    li.textContent = `${ap.name}: Range [${ap.profile.range.join('"-')}"], Attacks ${ap.profile.attacks}, Strength ${ap.profile.strength}, Damage ${ap.profile.damage}, Crit ${ap.profile.crit} (Runemark: ${ap.profile.weaponRunemark || 'None'})`;
+    attackProfilesUl.appendChild(li);
+  });
+
+  document.getElementById('blessingEffect').textContent = blessing && blessing.specialEffect ? blessing.specialEffect : 'None';
   document.getElementById('pointsTotal').textContent = totalPoints;
 
-  const attackList = profiles.map(p => {
-    let rangeText;
-    if (p.type === 'Melee') {
-      rangeText = Array.isArray(p.range) ? p.range[0] : p.range;
-    } else {
-      rangeText = Array.isArray(p.range) ? p.range.join('-') : p.range;
-    }
-    return `<li>${p.type}: Range ${rangeText}, Attacks ${p.attacks}, Strength ${p.strength}, Damage ${p.damage}/${p.crit}</li>`;
-  }).join('');
-  document.getElementById('attackProfiles').innerHTML = attackList;
+  document.getElementById('validationMessages').innerHTML = validationMessages.map(msg => `<li>${msg}</li>`).join('');
 }
 
-function saveBuild() {
-  const selections = {};
-  ['fighter', 'faction', 'archetype', 'primary', 'secondary', 'mount', 'blessing', 'runemark'].forEach(key => {
-    if (key === 'primary') {
-      selections[key] = getPrimaryWeaponNameFromDisplay(document.getElementById(`${key}Select`).value);
-    } else {
-      selections[key] = document.getElementById(`${key}Select`).value;
-    }
-  });
-  selections.fighterName = document.getElementById('fighterNameInput').value || '';
-  localStorage.setItem('warcryBuild', JSON.stringify(selections));
 
-  const text = exportTextSummary();
-  const blob = new Blob([text], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'fighter_build.txt';
-  a.click();
+function calculateWeaponProfile(profile, fighter, effects) {
+  const calculatedProfile = { ...profile
+  };
+
+  // Replace 'base' placeholders with fighter's base stats
+  calculatedProfile.range = calculatedProfile.range.map(val => {
+    if (val === 'baseReach') return fighter.R;
+    return val;
+  });
+  calculatedProfile.attacks = calculatedProfile.attacks === 'baseAttacks' ? fighter.A : calculatedProfile.attacks;
+  calculatedProfile.strength = calculatedProfile.strength === 'baseStrength' ? fighter.S : calculatedProfile.strength;
+  calculatedProfile.damage = calculatedProfile.damage === 'baseDamage' ? fighter.D : calculatedProfile.damage;
+  calculatedProfile.crit = calculatedProfile.crit === 'baseCrit' ? fighter.C : calculatedProfile.crit;
+
+  // Apply weapon-specific effects (from the weapon's own 'effects' field)
+  if (effects) {
+    calculatedProfile.range[1] = (calculatedProfile.range[1] || 0) + (effects.rangeBonus || 0); // Assuming rangeBonus adds to max range
+    calculatedProfile.attacks += (effects.attackBonus || 0);
+    calculatedProfile.strength += (effects.strengthBonus || 0);
+    calculatedProfile.damage += (effects.damageBonus || 0);
+    calculatedProfile.crit += (effects.critBonus || 0);
+  }
+
+  return calculatedProfile;
+}
+
+
+// Save/Load Functions
+function saveBuild() {
+  const build = {
+    fighterName: document.getElementById('fighterNameInput').value,
+    fighter: document.getElementById('fighterSelect').value,
+    faction: document.getElementById('factionSelect').value,
+    archetype: document.getElementById('archetypeSelect').value,
+    primaryWeapon: document.getElementById('primarySelect').value,
+    secondaryEquipment: document.getElementById('secondarySelect').value,
+    mount: document.getElementById('mountSelect').value,
+    divineBlessing: document.getElementById('blessingSelect').value,
+    extraRunemark: document.getElementById('runemarkSelect').value
+  };
+  localStorage.setItem('warcryBuild', JSON.stringify(build));
+  alert('Build saved locally!');
+}
+
+function loadBuild() {
+  const savedBuild = localStorage.getItem('warcryBuild');
+  if (savedBuild) {
+    const build = JSON.parse(savedBuild);
+    document.getElementById('fighterNameInput').value = build.fighterName || '';
+    document.getElementById('fighterSelect').value = build.fighter || '';
+    updateFactionOptions(); // Update factions after setting fighter
+    document.getElementById('factionSelect').value = build.faction || 'None';
+    document.getElementById('archetypeSelect').value = build.archetype || 'None';
+    document.getElementById('primarySelect').value = build.primaryWeapon || '';
+    document.getElementById('secondarySelect').value = build.secondaryEquipment || 'None';
+    document.getElementById('mountSelect').value = build.mount || 'None';
+    document.getElementById('blessingSelect').value = build.divineBlessing || 'None';
+    document.getElementById('runemarkSelect').value = build.extraRunemark || 'None';
+    updateSummary();
+    alert('Build loaded from local storage!');
+  } else {
+    alert('No saved build found.');
+  }
 }
 
 function loadBuildFromFile() {
-  const fileInput = document.getElementById('loadFileInput');
-  fileInput.click();
-  fileInput.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
+  document.getElementById('loadFileInput').click();
+}
+
+document.getElementById('loadFileInput').addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (file) {
     const reader = new FileReader();
-    reader.onload = function(evt) {
-      const lines = evt.target.result.split('\n');
-      if (!lines[0].includes('Warcry Fighter Build')) {
-        alert('Invalid build file format.');
-        return;
+    reader.onload = (e) => {
+      try {
+        const build = JSON.parse(e.target.result);
+        document.getElementById('fighterNameInput').value = build.fighterName || '';
+        document.getElementById('fighterSelect').value = build.fighter || '';
+        updateFactionOptions(); // Update factions after setting fighter
+        document.getElementById('factionSelect').value = build.faction || 'None';
+        document.getElementById('archetypeSelect').value = build.archetype || 'None';
+        document.getElementById('primarySelect').value = build.primaryWeapon || '';
+        document.getElementById('secondarySelect').value = build.secondaryEquipment || 'None';
+        document.getElementById('mountSelect').value = build.mount || 'None';
+        document.getElementById('blessingSelect').value = build.divineBlessing || 'None';
+        document.getElementById('runemarkSelect').value = build.extraRunemark || 'None';
+        updateSummary();
+        alert('Build loaded from file!');
+      } catch (error) {
+        alert('Error loading build from file: Invalid JSON format.');
+        console.error('Error parsing JSON from file:', error);
       }
-      parseAndApplyBuild(lines);
     };
     reader.readAsText(file);
-  };
-}
-
-function parseAndApplyBuild(lines) {
-  const map = {};
-  lines.forEach(line => {
-    const [key, val] = line.split(':').map(s => s.trim());
-    if (key && val !== undefined) map[key] = val;
-  });
-  const fields = {
-    'Fighter': 'fighterSelect',
-    'Faction': 'factionSelect',
-    'Archetype': 'archetypeSelect',
-    'Primary': 'primarySelect',
-    'Secondary': 'secondarySelect',
-    'Mount': 'mountSelect',
-    'Blessing': 'blessingSelect',
-    'Extra Runemark': 'runemarkSelect'
-  };
-  for (const [label, id] of Object.entries(fields)) {
-    if (map[label]) {
-      if (label === 'Primary') {
-        const weapon = data.primaryWeapons.find(w => w.name === map[label]);
-        if (weapon) {
-          document.getElementById(id).value = `${weapon.name} (${weapon.handedness.charAt(0).toUpperCase() + weapon.handedness.slice(1)}-handed)`;
-        }
-      } else {
-        document.getElementById(id).value = map[label];
-      }
-    }
   }
-  if (map['Fighter Name']) document.getElementById('fighterNameInput').value = map['Fighter Name'];
-  updateSummary();
-}
+});
 
-function exportTextSummary() {
-  return `Warcry Fighter Build
-Fighter: ${document.getElementById('fighterSelect').value}
-Fighter Name: ${document.getElementById('fighterNameInput').value || 'Unnamed'}
-Faction: ${document.getElementById('factionSelect').value}
-Archetype: ${document.getElementById('archetypeSelect').value}
-Primary: ${getPrimaryWeaponNameFromDisplay(document.getElementById('primarySelect').value)}
-Secondary: ${document.getElementById('secondarySelect').value}
-Mount: ${document.getElementById('mountSelect').value}
-Blessing: ${document.getElementById('blessingSelect').value}
-Extra Runemark: ${document.getElementById('runemarkSelect').value}
-Total Points: ${document.getElementById('pointsTotal').textContent}`;
-}
 
 function exportBuildPDF() {
-  const { jsPDF } = window.jspdf;
+  const {
+    jsPDF
+  } = window.jspdf;
   const pdf = new jsPDF();
-  const content = document.getElementById('statsDisplay').innerText;
+
+  const fighterName = document.getElementById('fighterNameInput').value || 'Unnamed Fighter';
+  const fighterType = document.getElementById('fighterSelect').value;
+  const factionRunemark = document.getElementById('factionSelect').value;
+  const runemarks = document.getElementById('runemarkDisplay').textContent;
+  const mv = document.getElementById('statMv').textContent;
+  const t = document.getElementById('statT').textContent;
+  const w = document.getElementById('statW').textContent;
+  const attackProfilesUl = document.getElementById('attackProfiles');
+  const blessingEffect = document.getElementById('blessingEffect').textContent;
+  const totalPoints = document.getElementById('pointsTotal').textContent;
+
+  let y = 10;
+  pdf.setFontSize(16);
+  pdf.text(`Warcry Anvil of Apotheosis Fighter Profile`, 10, y);
+  y += 10;
+
   pdf.setFontSize(12);
-  pdf.text(content, 10, 10);
-  pdf.save('fighter_build.pdf');
+  pdf.text(`Fighter Name: ${fighterName}`, 10, y);
+  y += 7;
+  pdf.text(`Fighter Type: ${fighterType}`, 10, y);
+  y += 7;
+  pdf.text(`Faction Runemark: ${factionRunemark}`, 10, y);
+  y += 7;
+  pdf.text(`Runemarks: ${runemarks}`, 10, y);
+  y += 10;
+
+  pdf.setFontSize(14);
+  pdf.text(`Core Stats:`, 10, y);
+  y += 7;
+  pdf.setFontSize(12);
+  pdf.text(`Movement: ${mv}, Toughness: ${t}, Wounds: ${w}`, 10, y);
+  y += 10;
+
+  pdf.setFontSize(14);
+  pdf.text(`Attack Profiles:`, 10, y);
+  y += 7;
+  pdf.setFontSize(12);
+  Array.from(attackProfilesUl.children).forEach(li => {
+    pdf.text(li.textContent, 15, y);
+    y += 7;
+  });
+  y += 3;
+
+  pdf.setFontSize(12);
+  pdf.text(`Divine Blessing: ${blessingEffect}`, 10, y);
+  y += 10;
+
+  pdf.setFontSize(14);
+  pdf.text(`Total Points: ${totalPoints}`, 10, y);
+
+  pdf.save(`${fighterName.replace(/\s/g, '_')}_Warcry_Profile.pdf`);
 }
 
-init();
+
+// Initialize the application when the DOM is ready
+document.addEventListener('DOMContentLoaded', init);
