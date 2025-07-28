@@ -18,20 +18,20 @@ async function init() {
 
 function populateSelections() {
   fillSelect('fighterSelect', data.fighters.map(f => f.name));
-  fillSelect('archetypeSelect', data.archetypes.map(a => a.name));
+  fillSelect('archetypeSelect', data.archetypes.map(a => a.name)); // Removed 'None'
+  fillSelect('mountSelect', ['None'].concat(data.mounts.map(m => m.name)));
+  fillSelect('runemarkSelect', ['None'].concat(data.extraRunemarks.map(r => r.name)));
 
-  // Populate primarySelect with handedness
   const primaryWeaponOptions = data.primaryWeapons.map(w => `${w.name} (${w.handedness.charAt(0).toUpperCase() + w.handedness.slice(1)}-handed)`);
   fillSelect('primarySelect', primaryWeaponOptions);
 
   fillSelect('secondarySelect', ['None'].concat(data.secondaryWeapons.map(w => w.name)));
-  fillSelect('mountSelect', ['None'].concat(data.mounts.map(m => m.name)));
   fillSelect('blessingSelect', ['None'].concat(data.divineBlessings.map(b => b.name)));
-  fillSelect('runemarkSelect', ['None'].concat(data.extraRunemarks.map(r => r.name)));
+
 
   document.getElementById('fighterSelect').addEventListener('change', updateFactionOptions);
   document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', updateSummary));
-  updateFactionOptions();
+  updateFactionOptions(); // Initial call to set up dynamic options
 }
 
 function fillSelect(id, options) {
@@ -58,22 +58,8 @@ function getPrimaryWeaponNameFromDisplay(displayString) {
 function validateBuild(runemarks, profiles, fighter, archetype, mount) {
   const messages = [];
 
-  // Archetype restrictions
-  if (archetype) {
-    if (archetype.restrictions.forbiddenFighters.includes(fighter.name)) {
-      messages.push(`${archetype.name} cannot be taken by ${fighter.name}.`);
-    }
-    if (archetype.restrictions.forbiddenFactions.some(f => fighter.factionRunemarks.includes(f))) {
-      messages.push(`${archetype.name} cannot be taken by fighters from ${archetype.restrictions.forbiddenFactions.join(', ')}.`);
-    }
-  }
-
-  // Mount restrictions
-  if (mount && mount.name !== 'None') {
-    if (mount.restrictions.forbiddenFighters.includes(fighter.name)) {
-      messages.push(`${mount.name} cannot be taken by ${fighter.name}.`);
-    }
-  }
+  // Note: Archetype, Mount, and Duplicate Runemark validation messages
+  // are largely prevented by UI filtering now, but kept here for robustness.
 
   // Runemark cap (excluding faction runemark)
   if (runemarks.length > rules.maxRunemarks) {
@@ -85,13 +71,13 @@ function validateBuild(runemarks, profiles, fighter, archetype, mount) {
     messages.push(`Too many attack profiles (max ${rules.maxAttackActions}).`);
   }
 
-  // Secondary weapon restrictions (handled in updateSummary for disabling, but keep this for validation message)
+  // Secondary weapon restrictions
   const primarySelectValue = document.getElementById('primarySelect').value;
   const primaryWeaponName = getPrimaryWeaponNameFromDisplay(primarySelectValue);
   const primary = data.primaryWeapons.find(w => w.name === primaryWeaponName);
-  const secondary = document.getElementById('secondarySelect').value; // Get current selected secondary, even if disabled
+  const secondary = document.getElementById('secondarySelect').value;
 
-  if (secondary !== 'None' && primary?.handedness !== 'one') { // Use optional chaining for primary
+  if (secondary !== 'None' && primary?.handedness !== 'one') {
     messages.push(`Secondary weapon only allowed with one-handed primary weapons.`);
   }
 
@@ -165,35 +151,69 @@ function resolveRangedProfile(profile, stats, modifiers = {}) {
 }
 
 function updateSummary() {
-  const fighter = data.fighters.find(f => f.name === document.getElementById('fighterSelect').value);
-  const faction = document.getElementById('factionSelect').value;
-  const archetype = data.archetypes.find(a => a.name === document.getElementById('archetypeSelect').value);
+  const fighterSelectElement = document.getElementById('fighterSelect');
+  const archetypeSelectElement = document.getElementById('archetypeSelect');
+  const mountSelectElement = document.getElementById('mountSelect');
+  const secondarySelectElement = document.getElementById('secondarySelect');
+  const runemarkSelectElement = document.getElementById('runemarkSelect');
+  const factionSelectElement = document.getElementById('factionSelect');
+
+  const fighter = data.fighters.find(f => f.name === fighterSelectElement.value);
+  const faction = factionSelectElement.value; // Get current faction for filtering
+
+  // Store current selections to attempt to re-select them after filtering
+  const currentArchetypeValue = archetypeSelectElement.value;
+  const currentMountValue = mountSelectElement.value;
+  const currentRunemarkValue = runemarkSelectElement.value;
+
+  let allValidationMessages = [];
+
+  // --- Dynamic Filtering of Dropdowns ---
+
+  // 1. Filter Archetypes based on Fighter and Faction
+  const validArchetypes = data.archetypes.filter(a => {
+    const isForbiddenByFighter = a.restrictions.forbiddenFighters.includes(fighter.name);
+    const isForbiddenByFaction = a.restrictions.forbiddenFactions.some(f => faction.includes(f)); // Check if selected faction is among forbidden ones
+    return !isForbiddenByFighter && !isForbiddenByFaction;
+  });
+  fillSelect('archetypeSelect', validArchetypes.map(a => a.name)); // Removed 'None' here
+
+  // Try to re-select, otherwise default to 'Commander'
+  if (validArchetypes.some(a => a.name === currentArchetypeValue)) {
+    archetypeSelectElement.value = currentArchetypeValue;
+  } else {
+    archetypeSelectElement.value = 'Commander'; // Always default to Commander if current is invalid
+  }
+
+  // 2. Filter Mounts based on Fighter
+  const validMounts = data.mounts.filter(m => {
+    const isForbiddenByFighter = m.restrictions.forbiddenFighters.includes(fighter.name);
+    return !isForbiddenByFighter;
+  });
+  fillSelect('mountSelect', ['None'].concat(validMounts.map(m => m.name)));
+  // Try to re-select, otherwise default to 'None'
+  if (validMounts.some(m => m.name === currentMountValue)) {
+    mountSelectElement.value = currentMountValue;
+  } else {
+    mountSelectElement.value = 'None';
+  }
+
+  // --- Retrieve finalized selections after potential resets ---
+  let archetype = data.archetypes.find(a => a.name === archetypeSelectElement.value);
+  let mount = data.mounts.find(m => m.name === mountSelectElement.value) || null;
 
   const primarySelectValue = document.getElementById('primarySelect').value;
   const primaryWeaponName = getPrimaryWeaponNameFromDisplay(primarySelectValue);
   const primary = data.primaryWeapons.find(w => w.name === primaryWeaponName);
 
-  const secondarySelectElement = document.getElementById('secondarySelect');
   let secondary = data.secondaryWeapons.find(w => w.name === secondarySelectElement.value) || null;
-  const mount = data.mounts.find(m => m.name === document.getElementById('mountSelect').value) || null;
   const blessing = data.divineBlessings.find(b => b.name === document.getElementById('blessingSelect').value) || null;
-  const extraRunemark = data.extraRunemarks.find(r => r.name === document.getElementById('runemarkSelect').value) || null;
+  // extraRunemark will be handled after runemarks are compiled
 
   let stats = { Mv: fighter.Mv, T: fighter.T, W: fighter.W, S: fighter.S, A: fighter.A, D: fighter.D, C: fighter.C };
-  let runemarks = [...fighter.runemarks];
-  let factionRunemark = faction;
-  let allValidationMessages = [];
+  let runemarks = [...fighter.runemarks]; // Start with fighter's runemarks
 
-  // Enable/Disable Secondary Equipment based on Primary Weapon Handedness
-  if (primary && primary.handedness === 'two') {
-    secondarySelectElement.value = 'None'; // Set to None
-    secondarySelectElement.disabled = true; // Disable selection
-    secondary = null; // Ensure secondary is null for calculation if disabled
-  } else {
-    secondarySelectElement.disabled = false; // Re-enable if one-handed
-  }
-
-  // Archetype runemarks & effects
+  // Apply Archetype effects (if archetype is now valid or None)
   if (archetype) {
     if (archetype.effects.includes('gain runemark: Mystic')) runemarks.push('Mystic');
     if (archetype.effects.includes('gain runemark: Priest')) runemarks.push('Priest');
@@ -202,7 +222,7 @@ function updateSummary() {
     }
   }
 
-  // Mount
+  // Apply Mount effects (if mount is now valid or None)
   if (mount && mount.name !== 'None') {
     stats.Mv += mount.modifiers.movementBonus;
     stats.W += mount.modifiers.woundsBonus;
@@ -212,6 +232,17 @@ function updateSummary() {
     if (mount.restrictions.maxMovement) {
       stats.Mv = Math.min(stats.Mv, mount.restrictions.maxMovement);
     }
+  }
+
+  // Secondary Weapon Disable/Reset (existing logic)
+  if (primary && primary.handedness === 'two') {
+    if (secondarySelectElement.value !== 'None') {
+      secondarySelectElement.value = 'None';
+      secondary = null;
+    }
+    secondarySelectElement.disabled = true;
+  } else {
+    secondarySelectElement.disabled = false;
   }
 
   // Blessing
@@ -228,13 +259,25 @@ function updateSummary() {
     if (e.critBonus) stats.C += e.critBonus;
   }
 
-  // Extra runemark - Check for duplicates before adding to the displayed list
-  if (extraRunemark && extraRunemark.name !== 'None') {
-    if (runemarks.includes(extraRunemark.name)) {
-      allValidationMessages.push(`Warning: The additional runemark "${extraRunemark.name}" is already present.`);
+  // 3. Filter Additional Runemarks based on accumulated runemarks (including faction)
+  const allCurrentRunemarks = [...new Set([...runemarks, faction])]; // Combine unique runemarks and faction
+  const validExtraRunemarks = data.extraRunemarks.filter(r => {
+    // If an extra runemark has a 'cannotBeMounted' restriction, and a mount is selected, it's invalid.
+    if (mount && mount.name !== 'None' && r.restrictions.cannotBeMounted) {
+      return false;
     }
-    runemarks.push(extraRunemark.name);
+    // Only include if not already present
+    return !allCurrentRunemarks.includes(r.name);
+  });
+  fillSelect('runemarkSelect', ['None'].concat(validExtraRunemarks.map(r => r.name)));
+  // Try to re-select, otherwise default to 'None'
+  if (validExtraRunemarks.some(r => r.name === currentRunemarkValue)) {
+    runemarkSelectElement.value = currentRunemarkValue;
+  } else {
+    runemarkSelectElement.value = 'None';
   }
+  let extraRunemark = data.extraRunemarks.find(r => r.name === runemarkSelectElement.value) || null;
+
 
   // Primary/secondary mods
   if (primary.modifiers) {
@@ -243,7 +286,6 @@ function updateSummary() {
     stats.D += (primary.modifiers.damageBonus || 0);
     stats.C += (primary.modifiers.critBonus || 0);
   }
-  // Only apply secondary modifiers if secondary is not null (i.e., not disabled)
   if (secondary && secondary.name !== 'None') {
     stats.T += (secondary.modifiers.toughnessBonus || 0);
     stats.A += (secondary.modifiers.attackBonus || 0);
@@ -261,7 +303,6 @@ function updateSummary() {
 
   // Points calculation
   let totalPoints = fighter.points + (archetype?.points || 0) + (primary?.points || 0);
-  // Only add secondary points if secondary is not null (i.e., not disabled)
   if (secondary && secondary.name !== 'None') totalPoints += secondary.points;
   if (mount && mount.name !== 'None') totalPoints += mount.points;
   if (blessing && blessing.name !== 'None') {
@@ -272,8 +313,8 @@ function updateSummary() {
   // Display - Updated to remove S, A, D stats and only show Mv, T, W
   document.getElementById('fighterType').textContent = fighter.name;
   document.getElementById('fighterName').textContent = document.getElementById('fighterNameInput').value || 'Unnamed';
-  document.getElementById('runemarkDisplay').textContent = runemarks.join(', ') || '-';
-  document.getElementById('factionRunemarkDisplay').textContent = factionRunemark || '-';
+  document.getElementById('runemarkDisplay').textContent = [...new Set([...runemarks, faction, (extraRunemark ? extraRunemark.name : '')].filter(Boolean))].join(', ') || '-'; // Display unique runemarks including faction and extra (if any)
+  document.getElementById('factionRunemarkDisplay').textContent = faction;
   document.getElementById('statMv').textContent = stats.Mv;
   document.getElementById('statT').textContent = stats.T;
   document.getElementById('statW').textContent = stats.W;
@@ -296,7 +337,6 @@ function saveBuild() {
   const selections = {};
   ['fighter', 'faction', 'archetype', 'primary', 'secondary', 'mount', 'blessing', 'runemark'].forEach(key => {
     if (key === 'primary') {
-      // Save only the weapon name, not the handedness in brackets
       selections[key] = getPrimaryWeaponNameFromDisplay(document.getElementById(`${key}Select`).value);
     } else {
       selections[key] = document.getElementById(`${key}Select`).value;
@@ -305,7 +345,6 @@ function saveBuild() {
   selections.fighterName = document.getElementById('fighterNameInput').value || '';
   localStorage.setItem('warcryBuild', JSON.stringify(selections));
 
-  // Save as text export format
   const text = exportTextSummary();
   const blob = new Blob([text], { type: 'text/plain' });
   const a = document.createElement('a');
@@ -352,7 +391,6 @@ function parseAndApplyBuild(lines) {
   for (const [label, id] of Object.entries(fields)) {
     if (map[label]) {
       if (label === 'Primary') {
-        // Find the full option string including handedness
         const weapon = data.primaryWeapons.find(w => w.name === map[label]);
         if (weapon) {
           document.getElementById(id).value = `${weapon.name} (${weapon.handedness.charAt(0).toUpperCase() + weapon.handedness.slice(1)}-handed)`;
