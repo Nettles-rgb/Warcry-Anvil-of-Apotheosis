@@ -2,7 +2,8 @@
   {
     "name": "Commander",
     "points": 0,
-    "effects": [],
+    "runemarksAdded": [],
+    "fighterEffects": {},
     "attackProfile": null,
     "restrictions": {
       "forbiddenFighters": [],
@@ -14,7 +15,8 @@
   {
     "name": "Priest",
     "points": 5,
-    "effects": ["gain runemark: Priest"],
+    "runemarksAdded": ["Priest"],
+    "fighterEffects": {},
     "attackProfile": null,
     "restrictions": {
       "forbiddenFighters": ["Saurus"],
@@ -26,17 +28,19 @@
   {
     "name": "Mage",
     "points": 20,
-    "effects": [
-      "-1 melee attack (min 1)",
-      "gain runemark: Mystic"
-    ],
-    "attackProfile": {
+    "runemarksAdded": ["Mystic"],
+    "fighterEffects": {
+      "meleeAttackBonus": -1,
+      "meleeAttackMin": 1
+    },
+    "profile": {
+      "name": "Arcane Bolt",
       "range": [3, 7],
       "attacks": 2,
       "strength": 3,
       "damage": 3,
       "crit": 6,
-      "blast": true
+      "weaponRunemark": "Blast"
     },
     "restrictions": {
       "forbiddenFighters": ["Saurus"],
