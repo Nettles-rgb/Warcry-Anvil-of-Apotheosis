@@ -112,13 +112,12 @@ function updateSummary() {
   // 1. Filter Archetypes based on Fighter and Faction
   const archetypeSelectElement = document.getElementById('archetypeSelect');
   const currentArchetypeValue = archetypeSelectElement.value;
-  const selectedFaction = document.getElementById('factionSelect').value;
+  const selectedFaction = document.getElementById('factionSelect').value; // Get currently selected faction
 
   const validArchetypes = data.archetypes.filter(a => {
     const isForbiddenByFighter = a.restrictions.forbiddenFighters.includes(fighter.name);
-    // Check if any of the fighter's faction runemarks (including the currently selected one)
-    // are in the archetype's forbiddenFactions.
-    const isForbiddenByFaction = a.restrictions.forbiddenFactions.some(f => fighter.factionRunemarks.includes(f) || selectedFaction === f);
+    // Only check against the *currently selected* faction runemark
+    const isForbiddenByFaction = a.restrictions.forbiddenFactions.includes(selectedFaction);
     return !isForbiddenByFighter && !isForbiddenByFaction;
   });
   fillSelect('archetypeSelect', validArchetypes.map(a => a.name));
@@ -127,8 +126,6 @@ function updateSummary() {
   if (validArchetypes.some(a => a.name === currentArchetypeValue)) {
     archetypeSelectElement.value = currentArchetypeValue;
   } else {
-    // If 'Commander' is not a valid option, this will default to the first valid option.
-    // Ensure 'Commander' is always valid or handle cases where it might not be.
     if (validArchetypes.some(a => a.name === 'Commander')) {
       archetypeSelectElement.value = 'Commander';
     } else if (validArchetypes.length > 0) {
@@ -243,12 +240,9 @@ function updateSummary() {
   if (mount && mountSelectElement.value !== 'None') {
     totalPoints += mount.points;
     if (mount.runemarksAdded) {
-      // Malignant restriction for Mounted runemark
-      // Check if the fighter's *name* is 'Malignant' and if 'Mounted' is among the runemarks added by the mount
+      // Malignant restriction for Mounted runemark - Removed the warning message here
       if (!(fighter.name === 'Malignant' && mount.runemarksAdded.includes('Mounted'))) {
         mount.runemarksAdded.forEach(rm => currentRunemarks.add(rm));
-      } else {
-        validationMessages.push('Warning: Malignant fighters cannot gain the Mounted runemark.');
       }
     }
     if (mount.fighterEffects) {
