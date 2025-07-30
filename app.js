@@ -534,175 +534,90 @@ function populateSelections() {
   fillSelect('blessingTargetWeaponSelect', [], true); // Initially empty, will be populated dynamically
 }
 
-/**
- * Saves the current fighter build to local storage.
- */
 function saveBuild() {
-  const fighterName = document.getElementById('fighterNameInput').value;
-  const fighterType = document.getElementById('fighterSelect').value;
-  const factionRunemark = document.getElementById('factionSelect').value;
-  const archetype = document.getElementById('archetypeSelect').value;
-  const primaryWeapon = document.getElementById('primarySelect').value;
-  const secondaryWeapon = document.getElementById('secondarySelect').value;
-  const mount = document.getElementById('mountSelect').value;
-  const blessing = document.getElementById('blessingSelect').value;
-  const blessingTargetWeapon = document.getElementById('blessingTargetWeaponSelect').value; // Save selected target weapon
-  const runemark = document.getElementById('runemarkSelect').value;
+  const selections = {};
+  ['fighter', 'faction', 'archetype', 'primary', 'secondary', 'mount', 'blessing', 'blessingTargetWeapon', 'runemark'].forEach(key => {
+    selections[key] = document.getElementById(`${key}Select`).value;
+  });
+  selections.fighterName = document.getElementById('fighterNameInput').value || '';
+  localStorage.setItem('warcryBuild', JSON.stringify(selections));
 
-  const build = {
-    fighterName,
-    fighterType,
-    factionRunemark,
-    archetype,
-    primaryWeapon,
-    secondaryWeapon,
-    mount,
-    blessing,
-    blessingTargetWeapon, // Add to saved build
-    runemark
-  };
-
-  localStorage.setItem('warcryFighterBuild', JSON.stringify(build));
-  const validationMessagesDiv = document.getElementById('validationMessages');
-  validationMessagesDiv.innerHTML = '<p style="color: green;">Fighter build saved locally!</p>';
+  // Save as text export format
+  const text = exportTextSummary();
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fighter_build.txt';
+  a.click();
 }
 
-/**
- * Loads a fighter build from local storage.
- */
-function loadBuild() {
-  const savedBuild = localStorage.getItem('warcryFighterBuild');
-  if (savedBuild) {
-    const build = JSON.parse(savedBuild);
-    document.getElementById('fighterNameInput').value = build.fighterName || '';
-    document.getElementById('fighterSelect').value = build.fighterType || '';
-    updateSummary(); // This call is crucial to re-filter options before setting values
-    document.getElementById('factionSelect').value = build.factionRunemark || '';
-    document.getElementById('archetypeSelect').value = build.archetype || '';
-
-    // Set primary weapon, then call updateSummary to populate secondary options
-    document.getElementById('primarySelect').value = build.primaryWeapon || '';
-    updateSummary(); // This will re-filter secondary and ensure it's valid
-
-    document.getElementById('secondarySelect').value = build.secondaryWeapon || '';
-    document.getElementById('mountSelect').value = build.mount || '';
-    document.getElementById('blessingSelect').value = build.blessing || '';
-    updateSummary(); // This will populate blessingTargetWeaponSelect
-    document.getElementById('blessingTargetWeaponSelect').value = build.blessingTargetWeapon || 'None'; // Load selected target weapon
-    document.getElementById('runemarkSelect').value = build.runemark || '';
-
-    updateSummary(); // Final update to reflect all loaded selections
-    const validationMessagesDiv = document.getElementById('validationMessages');
-    validationMessagesDiv.innerHTML = '<p style="color: green;">Fighter build loaded from local storage!</p>';
-  } else {
-    const validationMessagesDiv = document.getElementById('validationMessages');
-    validationMessagesDiv.innerHTML = '<p style="color: red;">No saved build found!</p>';
-  }
-}
-
-/**
- * Loads a fighter build from a user-selected file.
- */
 function loadBuildFromFile() {
-  const input = document.getElementById('loadFileInput');
-  input.click(); // Trigger file input click
-
-  input.onchange = function(event) {
-    const file = event.files[0];
+  const fileInput = document.getElementById('loadFileInput');
+  fileInput.click();
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const build = JSON.parse(e.target.result);
-        document.getElementById('fighterNameInput').value = build.fighterName || '';
-        document.getElementById('fighterSelect').value = build.fighterType || '';
-        updateSummary(); // Repopulate factionSelect
-        document.getElementById('factionSelect').value = build.factionRunemark || '';
-        document.getElementById('archetypeSelect').value = build.archetype || '';
-        document.getElementById('primarySelect').value = build.primaryWeapon || '';
-        updateSummary(); // Repopulate secondarySelect
-        document.getElementById('secondarySelect').value = build.secondaryWeapon || '';
-        document.getElementById('mountSelect').value = build.mount || '';
-        document.getElementById('blessingSelect').value = build.blessing || '';
-        updateSummary(); // This will populate blessingTargetWeaponSelect
-        document.getElementById('blessingTargetWeaponSelect').value = build.blessingTargetWeapon || 'None'; // Load selected target weapon
-        document.getElementById('runemarkSelect').value = build.runemark || '';
-        updateSummary(); // Final update
-        const validationMessagesDiv = document.getElementById('validationMessages');
-        validationMessagesDiv.innerHTML = '<p style="color: green;">Fighter build loaded from file!</p>';
-      } catch (error) {
-        const validationMessagesDiv = document.getElementById('validationMessages');
-        validationMessagesDiv.innerHTML = '<p style="color: red;">Error loading file: Invalid JSON format.</p>';
-        console.error('Error parsing loaded file:', error);
+    reader.onload = function(evt) {
+      const lines = evt.target.result.split('\n');
+      if (!lines[0].includes('Warcry Fighter Build')) {
+        alert('Invalid build file format.');
+        return;
       }
+      parseAndApplyBuild(lines);
     };
     reader.readAsText(file);
   };
 }
 
-/**
- * Exports the current fighter build to a PDF.
- */
+function parseAndApplyBuild(lines) {
+  const map = {};
+  lines.forEach(line => {
+    const [key, val] = line.split(':').map(s => s.trim());
+    if (key && val !== undefined) map[key] = val;
+  });
+  const fields = {
+    'Fighter': 'fighterSelect',
+    'Faction': 'factionSelect',
+    'Archetype': 'archetypeSelect',
+    'Primary': 'primarySelect',
+    'Secondary': 'secondarySelect',
+    'Mount': 'mountSelect',
+    'Blessing': 'blessingSelect',
+    'BlessingTargetWeapon': 'blessingTargetWeaponSelect',
+    'Extra Runemark': 'runemarkSelect'
+  };
+  for (const [label, id] of Object.entries(fields)) {
+    if (map[label]) document.getElementById(id).value = map[label];
+  }
+  if (map['Fighter Name']) document.getElementById('fighterNameInput').value = map['Fighter Name'];
+  updateSummary();
+}
+
+function exportTextSummary() {
+  return `Warcry Fighter Build
+Fighter: ${document.getElementById('fighterSelect').value}
+Fighter Name: ${document.getElementById('fighterNameInput').value || 'Unnamed'}
+Faction: ${document.getElementById('factionSelect').value}
+Archetype: ${document.getElementById('archetypeSelect').value}
+Primary: ${document.getElementById('primarySelect').value}
+Secondary: ${document.getElementById('secondarySelect').value}
+Mount: ${document.getElementById('mountSelect').value}
+Blessing: ${document.getElementById('blessingSelect').value}
+BlessingTargetWeapon: ${document.getElementById('blessingTargetWeaponSelect').value}
+Extra Runemark: ${document.getElementById('runemarkSelect').value}
+Total Points: ${document.getElementById('pointsTotal').textContent}`;
+}
+
 function exportBuildPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
-
-  const fighterName = document.getElementById('fighterName').textContent;
-  const fighterType = document.getElementById('fighterType').textContent;
-  const factionRunemark = document.getElementById('factionRunemarkDisplay').textContent;
-  const runemarks = document.getElementById('runemarkDisplay').textContent;
-  const mv = document.getElementById('statMv').textContent;
-  const t = document.getElementById('statT').textContent;
-  const w = document.getElementById('statW').textContent;
-  const attackProfilesUl = document.getElementById('attackProfiles');
-  const blessingEffect = document.getElementById('blessingEffect').textContent;
-  const totalPoints = document.getElementById('pointsTotal').textContent;
-
-  let y = 10;
-  pdf.setFontSize(16);
-  pdf.text(`Warcry Anvil of Apotheosis Fighter Profile`, 10, y);
-  y += 10;
-
+  const content = document.getElementById('statsDisplay').innerText;
   pdf.setFontSize(12);
-  pdf.text(`Fighter Name: ${fighterName}`, 10, y);
-  y += 7;
-  pdf.text(`Fighter Type: ${fighterType}`, 10, y);
-  y += 7;
-  pdf.text(`Faction Runemark: ${factionRunemark}`, 10, y);
-  y += 7;
-  pdf.text(`Runemarks: ${runemarks}`, 10, y);
-  y += 10;
-
-  pdf.setFontSize(14);
-  pdf.text(`Core Stats:`, 10, y);
-  y += 7;
-  pdf.setFontSize(12);
-  pdf.text(`Movement: ${mv}, Toughness: ${t}, Wounds: ${w}`, 10, y);
-  y += 10;
-
-  pdf.setFontSize(14);
-  pdf.text(`Attack Profiles:`, 10, y);
-  y += 7;
-  pdf.setFontSize(12);
-  Array.from(attackProfilesUl.children).forEach(li => {
-    pdf.text(li.textContent, 10, y);
-    y += 7;
-  });
-  y += 10;
-
-  pdf.setFontSize(14);
-  pdf.text(`Divine Blessing:`, 10, y);
-  y += 7;
-  pdf.setFontSize(12);
-  pdf.text(blessingEffect, 10, y);
-  y += 10;
-
-  pdf.setFontSize(14);
-  pdf.text(`Total Points: ${totalPoints}`, 10, y);
-
-  pdf.save(`${fighterName.replace(/ /g, '_')}_Warcry_Fighter_Profile.pdf`);
+  pdf.text(content, 10, 10);
+  pdf.save('fighter_build.pdf');
 }
+
 
 
 // Initialize the app when the DOM is fully loaded
