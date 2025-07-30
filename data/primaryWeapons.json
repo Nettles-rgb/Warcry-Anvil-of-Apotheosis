@@ -3,208 +3,286 @@
     "name": "Hand Weapon",
     "points": 0,
     "handedness": "one",
-    "modifiers": {
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Blade"
+    },
+    "effects": {
       "rangeBonus": 0,
       "attackBonus": 0,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    }
   },
   {
     "name": "Spear",
     "points": 0,
     "handedness": "one",
-    "modifiers": {
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Spear"
+    },
+    "effects": {
       "rangeBonus": 1,
       "attackBonus": -1,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 1
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    }
   },
   {
     "name": "Halberd",
     "points": 5,
     "handedness": "two",
-    "modifiers": {
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Halberd"
+    },
+    "effects": {
       "rangeBonus": 1,
       "attackBonus": -1,
       "strengthBonus": 1,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    }
   },
   {
     "name": "Great Weapon",
     "points": 5,
     "handedness": "two",
-    "modifiers": {
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Great Weapon"
+    },
+    "effects": {
       "rangeBonus": 0,
       "attackBonus": -1,
       "strengthBonus": 1,
       "damageBonus": 1,
       "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    }
   },
   {
     "name": "Flail",
     "points": 5,
     "handedness": "two",
-    "modifiers": {
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Flail"
+    },
+    "effects": {
       "rangeBonus": 2,
       "attackBonus": 0,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    }
   },
   {
     "name": "Staff",
     "points": -5,
     "handedness": "one",
-    "modifiers": {
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Staff"
+    },
+    "effects": {
       "rangeBonus": 1,
       "attackBonus": -1,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    }
   },
   {
     "name": "Dagger",
     "points": -10,
     "handedness": "one",
-    "modifiers": {
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Dagger"
+    },
+    "effects": {
       "rangeBonus": 0,
       "attackBonus": -1,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    }
   },
   {
     "name": "Great Bow",
     "points": 30,
     "handedness": "two",
-    "modifiers": {},
-    "addsRangedProfile": {
+    "profile": {
       "range": [3, 15],
       "attacks": 2,
       "strength": "baseStrength",
       "damage": 2,
-      "crit": 5
+      "crit": 5,
+      "weaponRunemark": "Bow"
     },
-    "notes": ["Fighter counts as unarmed in melee"]
-  },
-  {
-    "name": "Grandspear",
-    "points": 5,
-    "handedness": "two",
-    "modifiers": {
-      "rangeBonus": 1,
+    "effects": {
+      "rangeBonus": 0,
       "attackBonus": 0,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
     },
-    "addsRangedProfile": null,
-    "notes": []
+    "fighterEffects": {
+      "unarmedInMelee": true
+    }
+  },
+  {
+    "name": "Grandspear",
+    "points": 5,
+    "handedness": "two",
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Spear"
+    },
+    "effects": {
+      "rangeBonus": 1,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
   },
   {
     "name": "Throwing Spear",
     "points": 5,
     "handedness": "one",
-    "modifiers": {
+    "profile": {
+      "range": [0, 8],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Spear"
+    },
+    "effects": {
       "rangeBonus": 0,
       "attackBonus": -2,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 1
-    },
-    "addsRangedProfile": {
-      "range": [0, 8],
-      "attacks": "baseAttacks",
-      "strength": "baseStrength",
-      "damage": "baseDamage",
-      "crit": "baseCrit"
-    },
-    "notes": ["Replaces melee profile entirely"]
+    }
   },
   {
     "name": "Throwing Axe",
     "points": 10,
     "handedness": "one",
-    "modifiers": {
+    "profile": {
+      "range": [0, 8],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Axe"
+    },
+    "effects": {
       "rangeBonus": 0,
       "attackBonus": -1,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": {
-      "range": [0, 8],
-      "attacks": "baseAttacks",
-      "strength": "baseStrength",
-      "damage": "baseDamage",
-      "crit": "baseCrit"
-    },
-    "notes": ["Replaces melee profile entirely"]
+    }
   },
   {
     "name": "Handgun",
     "points": 20,
     "handedness": "two",
-    "modifiers": {},
-    "addsRangedProfile": {
+    "profile": {
       "range": [3, 12],
       "attacks": 2,
       "strength": 4,
       "damage": 2,
-      "crit": 5
+      "crit": 5,
+      "weaponRunemark": "Gun"
     },
-    "notes": ["Fighter counts as unarmed in melee"]
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "fighterEffects": {
+      "unarmedInMelee": true
+    }
   },
   {
     "name": "Pistol",
     "points": -10,
     "handedness": "one",
-    "modifiers": {},
-    "addsRangedProfile": {
+    "profile": {
       "range": [0, 8],
       "attacks": 2,
       "strength": 4,
       "damage": 1,
-      "crit": 3
+      "crit": 3,
+      "weaponRunemark": "Gun"
     },
-    "notes": ["Replaces melee profile entirely"]
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
   },
   {
     "name": "Brace of Pistols",
     "points": 10,
     "handedness": "two",
-    "modifiers": {},
-    "addsRangedProfile": {
+    "profile": {
       "range": [0, 8],
       "attacks": 4,
       "strength": 4,
       "damage": 1,
-      "crit": 3
+      "crit": 3,
+      "weaponRunemark": "Gun"
     },
-    "notes": ["Replaces melee profile entirely"]
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
   }
 ]

@@ -2,103 +2,111 @@
   {
     "name": "Shield",
     "points": 5,
-    "modifiers": {
-      "toughnessBonus": 1,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": []
+    "handedness": "one",
+    "profile": null,
+    "effects": null,
+    "fighterEffects": {
+      "toughnessBonus": 1
+    }
   },
   {
     "name": "Bow",
     "points": 45,
-    "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": {
+    "handedness": "one",
+    "profile": {
       "range": [3, 15],
       "attacks": 2,
       "strength": "baseStrength",
       "damage": 1,
-      "crit": 3
+      "crit": 3,
+      "weaponRunemark": "Bow"
     },
-    "notes": []
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
   },
   {
     "name": "Additional Hand Weapon",
     "points": 10,
-    "modifiers": {
-      "toughnessBonus": 0,
+    "handedness": "one",
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Blade"
+    },
+    "effects": {
+      "rangeBonus": 0,
       "attackBonus": 1,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": null,
-    "notes": ["Applies bonus to melee profile only"]
+    }
   },
   {
     "name": "Pistol",
     "points": 20,
-    "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": {
+    "handedness": "one",
+    "profile": {
       "range": [0, 8],
       "attacks": 2,
       "strength": 4,
       "damage": 1,
-      "crit": 3
+      "crit": 3,
+      "weaponRunemark": "Gun"
     },
-    "notes": []
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
   },
   {
     "name": "Throwing Daggers",
     "points": 20,
-    "modifiers": {
-      "toughnessBonus": 0,
-      "attackBonus": 0,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    },
-    "addsRangedProfile": {
+    "handedness": "one",
+    "profile": {
       "range": [0, 8],
       "attacks": 3,
       "strength": 3,
       "damage": 1,
-      "crit": 2
+      "crit": 2,
+      "weaponRunemark": "Dagger"
     },
-    "notes": []
-  },
-  {
-    "name": "Sling",
-    "points": 5,
-    "modifiers": {
-      "toughnessBonus": 0,
+    "effects": {
+      "rangeBonus": 0,
       "attackBonus": 0,
       "strengthBonus": 0,
       "damageBonus": 0,
       "critBonus": 0
-    },
-    "addsRangedProfile": {
+    }
+  },
+  {
+    "name": "Sling",
+    "points": 5,
+    "handedness": "one",
+    "profile": {
       "range": [0, 8],
       "attacks": 2,
       "strength": 2,
       "damage": 1,
-      "crit": 2
+      "crit": 2,
+      "weaponRunemark": "Sling"
     },
-    "notes": []
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
   }
 ]

@@ -2,48 +2,71 @@
   {
     "name": "Fast Mount",
     "points": 55,
-    "modifiers": {
-      "movementBonus": 5,
-      "woundsBonus": 5,
-      "attackBonus": 0,
-      "toughnessBonus": 0
-    },
     "runemarksAdded": ["Mounted"],
+    "fighterEffects": {
+      "movementBonus": 5,
+      "woundsBonus": 5
+    },
     "restrictions": {
       "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
-      "specialCases": ["Malignants do not gain the Mounted runemark"],
-      "maxMovement": 12
+      "maxMovement": 12,
+      "noMountedRunemarkFor": ["Malignant"]
     }
   },
   {
     "name": "Heavy Mount",
-    "points": 55,
-    "modifiers": {
-      "movementBonus": 3,
-      "woundsBonus": 5,
-      "attackBonus": 1,
-      "toughnessBonus": 0
-    },
+    "points": 40,
     "runemarksAdded": ["Mounted"],
+    "fighterEffects": {
+      "movementBonus": 3,
+      "woundsBonus": 5
+    },
     "restrictions": {
       "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
-      "specialCases": ["Malignants do not gain the Mounted runemark"],
-      "maxMovement": 8
+      "maxMovement": 8,
+      "noMountedRunemarkFor": ["Malignant"]
+    }
+  }, 
+  {
+    "name": "Bestial Mount",
+    "points": 50,
+    "runemarksAdded": ["Mounted"],
+    "fighterEffects": {
+      "movementBonus": 2,
+      "woundsBonus": 5
+    },
+    "profile": {
+      "name": "Bestial Claws",
+      "range": [0, "baseReach"],
+      "attacks": 2,
+      "strength": 5,
+      "damage": 2,
+      "crit": 5,
+      "weaponRunemark": "Claws"
+    },
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 0,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    },
+    "restrictions": {
+      "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
+      "maxMovement": 8,
+      "noMountedRunemarkFor": ["Malignant"]
     }
   },
   {
     "name": "Flying Mount",
-    "points": 40,
-    "modifiers": {
-      "movementBonus": 3,
-      "woundsBonus": 5,
-      "attackBonus": 0,
-      "toughnessBonus": 0
-    },
+    "points": 55,
     "runemarksAdded": ["Fly"],
+    "fighterEffects": {
+      "movementBonus": 3,
+      "woundsBonus": 5
+    },
     "restrictions": {
       "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
-      "specialCases": [],
       "maxMovement": 10
     }
   }
