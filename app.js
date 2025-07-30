@@ -23,6 +23,8 @@ async function init() {
   document.getElementById('secondarySelect').addEventListener('change', updateSummary);
   document.getElementById('mountSelect').addEventListener('change', updateSummary);
   document.getElementById('blessingSelect').addEventListener('change', updateSummary);
+  // New event listener for the blessing target weapon select
+  document.getElementById('blessingTargetWeaponSelect').addEventListener('change', updateSummary);
   document.getElementById('runemarkSelect').addEventListener('change', updateSummary);
   document.getElementById('fighterNameInput').addEventListener('input', updateSummary); // Listen for name changes
 
@@ -102,8 +104,7 @@ function updateSummary() {
   };
   let currentRunemarks = [];
   let currentFactionRunemark = 'None';
-  let finalAttackProfiles = [];
-  let hasMeleeWeapon = false; // Flag to check if any selected weapon is melee
+  let hasMeleeWeapon = false; // Flag to check if any selected weapon is usable in base combat
 
   // --- 1. Base Fighter Selection ---
   const selectedFighter = getSelectedData('fighterSelect', data.fighters);
@@ -169,18 +170,6 @@ function updateSummary() {
           currentRunemarks.push(rm);
         }
       });
-    }
-    // Add Archetype's attack profile if it exists
-    if (selectedArchetype.profile) {
-      // Deep copy the profile and its range array
-      const profile = { ...selectedArchetype.profile, range: [...selectedArchetype.profile.range] };
-      profile.name = selectedArchetype.profile.name;
-      // Resolve baseReach for archetype profiles
-      profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
-      finalAttackProfiles.push(profile);
-      if (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) {
-        hasMeleeWeapon = true;
-      }
     }
   }
 
@@ -275,18 +264,6 @@ function updateSummary() {
         }
       });
     }
-    // Add mount's attack profile if it exists
-    if (selectedMount.profile) {
-      // Deep copy the profile and its range array
-      const profile = { ...selectedMount.profile, range: [...selectedMount.profile.range] };
-      profile.name = selectedMount.profile.name;
-      // Resolve baseReach for mount profiles
-      profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
-      finalAttackProfiles.push(profile);
-      if (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) {
-        hasMeleeWeapon = true;
-      }
-    }
   }
 
   // --- 6. Divine Blessing Selection ---
@@ -341,7 +318,10 @@ function updateSummary() {
   }
 
   // --- Final Attack Profile Generation (after all stats and selections are finalized) ---
-  // Add the unarmed profile first for the current calculation pass
+  // Start with an empty list for the final attack profiles for the current calculation pass
+  let tempAttackProfiles = [];
+
+  // Add the unarmed profile first
   const unarmedProfile = {
     name: "Unarmed",
     range: [0, 1],
@@ -351,11 +331,10 @@ function updateSummary() {
     crit: Math.max(currentFighter.C + (rules.unarmedPenalties.critPenalty || 0), rules.unarmedPenalties.minimumValues.crit),
     weaponRunemark: "Fist" // Generic unarmed runemark
   };
-  finalAttackProfiles = [unarmedProfile]; // Reset and add unarmed
-
+  tempAttackProfiles.push(unarmedProfile);
   hasMeleeWeapon = false; // Reset for recalculation based on current selections
 
-  // Re-process Primary Weapon to add its profile to finalAttackProfiles
+  // Process Primary Weapon (if valid and selected)
   if (selectedPrimaryWeapon && selectedPrimaryWeapon.profile) {
     // Deep copy the profile and its range array to prevent cumulative effects
     const profile = { ...selectedPrimaryWeapon.profile, range: [...selectedPrimaryWeapon.profile.range] };
@@ -377,14 +356,14 @@ function updateSummary() {
       profile.crit += (selectedPrimaryWeapon.effects.critBonus || 0);
     }
 
-    finalAttackProfiles.push(profile);
+    tempAttackProfiles.push(profile);
     // Check if it's a melee weapon (min range 0 or baseReach which is 0)
     if (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) {
       hasMeleeWeapon = true;
     }
   }
 
-  // Re-process Secondary Equipment to add its profile to finalAttackProfiles
+  // Process Secondary Equipment (if valid and selected)
   if (selectedSecondaryWeapon && selectedSecondaryWeapon.profile) {
     // Deep copy the profile and its range array
     const profile = { ...selectedSecondaryWeapon.profile, range: [...selectedSecondaryWeapon.profile.range] };
@@ -406,73 +385,80 @@ function updateSummary() {
       profile.crit += (selectedSecondaryWeapon.effects.critBonus || 0);
     }
 
-    finalAttackProfiles.push(profile);
+    tempAttackProfiles.push(profile);
     if (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) {
       hasMeleeWeapon = true;
     }
   }
 
-  // Re-process Archetype Attack Profile (if valid and selected)
+  // Process Archetype Attack Profile (if valid and selected)
   if (selectedArchetype && selectedArchetype.profile) {
     // Deep copy the profile and its range array
     const profile = { ...selectedArchetype.profile, range: [...selectedArchetype.profile.range] };
     profile.name = selectedArchetype.profile.name;
     // Resolve baseReach for archetype profiles
     profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
-    finalAttackProfiles.push(profile);
+    tempAttackProfiles.push(profile);
     if (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) {
       hasMeleeWeapon = true;
     }
   }
 
-  // Re-process Mount Attack Profile (if valid and selected)
+  // Process Mount Attack Profile (if valid and selected)
   if (selectedMount && selectedMount.profile) {
     // Deep copy the profile and its range array
     const profile = { ...selectedMount.profile, range: [...selectedMount.profile.range] };
     profile.name = selectedMount.profile.name;
     // Resolve baseReach for mount profiles
     profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
-    finalAttackProfiles.push(profile);
+    tempAttackProfiles.push(profile);
     if (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) {
       hasMeleeWeapon = true;
     }
   }
 
-  // Conditional Unarmed Removal: Remove the unarmed profile if any melee weapon is present
+  // Conditional Unarmed Removal: Remove the unarmed profile if any weapon usable in base combat is present
   if (hasMeleeWeapon) {
-    finalAttackProfiles = finalAttackProfiles.filter(p => p.name !== "Unarmed");
+    tempAttackProfiles = tempAttackProfiles.filter(p => p.name !== "Unarmed");
   }
 
-  // Apply Divine Blessing Weapon Effects (after all profiles are determined)
+  // Assign to finalAttackProfiles for display and blessing application
+  finalAttackProfiles = tempAttackProfiles;
+
+  // --- Divine Blessing Target Weapon Selection Logic ---
+  const blessingTargetWeaponSelect = document.getElementById('blessingTargetWeaponSelect');
+  let eligibleTargetWeapons = [];
+
   if (selectedBlessing && selectedBlessing.targetable && selectedBlessing.weaponEffect) {
-    let blessingApplied = false;
-    for (let i = 0; i < finalAttackProfiles.length; i++) {
-      const profile = finalAttackProfiles[i];
-      // A weapon is considered melee if its minimum range is 0 or 'baseReach' (which implies 0)
-      const isMelee = (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0));
+    eligibleTargetWeapons = finalAttackProfiles.filter(profile => {
+      // Resolve range for comparison
+      const minRangeResolved = profile.range[0] === "baseReach" ? currentFighter.R : profile.range[0];
+      const maxRangeResolved = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
 
-      if (selectedBlessing.targetProfile === "melee" && isMelee) {
-        // Apply to the first eligible melee weapon
-        profile.attacks = (profile.attacks || 0) + (selectedBlessing.weaponEffect.attackBonus || 0);
-        profile.strength = (profile.strength || 0) + (selectedBlessing.weaponEffect.strengthBonus || 0);
-        profile.damage = (profile.damage || 0) + (selectedBlessing.weaponEffect.damageBonus || 0);
-        profile.crit = (profile.crit || 0) + (selectedBlessing.weaponEffect.critBonus || 0);
-        blessingApplied = true;
-        break; // Only apply to one weapon
-      } else if (selectedBlessing.targetProfile === "any") {
-        // Apply to the first weapon regardless of type
-        profile.attacks = (profile.attacks || 0) + (selectedBlessing.weaponEffect.attackBonus || 0);
-        profile.strength = (profile.strength || 0) + (selectedBlessing.weaponEffect.strengthBonus || 0);
-        profile.damage = (profile.damage || 0) + (selectedBlessing.weaponEffect.damageBonus || 0);
-        profile.crit = (profile.crit || 0) + (selectedBlessing.weaponEffect.critBonus || 0);
-        blessingApplied = true;
-        break; // Only apply to one weapon
-      }
-    }
-    if (!blessingApplied) {
-      messages.push(`Selected Divine Blessing '${selectedBlessing.name}' could not be applied to any eligible weapon.`);
-    }
+      // Define a melee weapon for blessing purposes: min range 0 AND max range <= 3
+      const isMeleeForBlessing = (minRangeResolved === 0) && (maxRangeResolved <= 3);
+
+      return (selectedBlessing.targetProfile === "melee" && isMeleeForBlessing) ||
+             (selectedBlessing.targetProfile === "any");
+    }).map(profile => profile.name);
   }
+
+  fillSelect('blessingTargetWeaponSelect', eligibleTargetWeapons, true); // Allow 'None' for target weapon
+  blessingTargetWeaponSelect.disabled = !(selectedBlessing && selectedBlessing.targetable && eligibleTargetWeapons.length > 0);
+
+  const selectedTargetWeaponName = blessingTargetWeaponSelect.value;
+  const targetWeaponProfile = finalAttackProfiles.find(p => p.name === selectedTargetWeaponName);
+
+  // Apply Divine Blessing Weapon Effects (only to the selected target weapon)
+  if (selectedBlessing && selectedBlessing.targetable && selectedBlessing.weaponEffect && targetWeaponProfile) {
+    targetWeaponProfile.attacks = (targetWeaponProfile.attacks || 0) + (selectedBlessing.weaponEffect.attackBonus || 0);
+    targetWeaponProfile.strength = (targetWeaponProfile.strength || 0) + (selectedBlessing.weaponEffect.strengthBonus || 0);
+    targetWeaponProfile.damage = (targetWeaponProfile.damage || 0) + (selectedBlessing.weaponEffect.damageBonus || 0);
+    targetWeaponProfile.crit = (targetWeaponProfile.crit || 0) + (selectedBlessing.weaponEffect.critBonus || 0);
+  } else if (selectedBlessing && selectedBlessing.targetable && selectedBlessing.weaponEffect && !targetWeaponProfile && eligibleTargetWeapons.length > 0) {
+      messages.push(`Please select a target weapon for the '${selectedBlessing.name}' Divine Blessing.`);
+  }
+
 
   // Runemark Limit Validation (after all runemarks are accumulated)
   if (currentRunemarks.length > rules.maxRunemarks) {
@@ -519,7 +505,11 @@ function updateSummary() {
  * Populates the initial selection dropdowns.
  */
 function populateSelections() {
-  fillSelect('fighterSelect', data.fighters.map(f => f.name));
+  fillSelect('fighterSelect', data.fighters.map(f => f.name), false); // Fighter Type should not allow 'None'
+  if (data.fighters.length > 0) {
+    document.getElementById('fighterSelect').value = data.fighters[0].name; // Default to the first fighter
+  }
+
   fillSelect('archetypeSelect', data.archetypes.map(a => a.name), false); // Archetype must be selected, no 'None'
 
   fillSelect('mountSelect', data.mounts.map(m => m.name), true); // Mounts can be 'None'
@@ -535,6 +525,7 @@ function populateSelections() {
   fillSelect('secondarySelect', [], true); // Secondary weapons can be 'None'
 
   fillSelect('blessingSelect', data.divineBlessings.map(b => b.name), true); // Divine Blessings can be 'None'
+  fillSelect('blessingTargetWeaponSelect', [], true); // Initially empty, will be populated dynamically
 }
 
 /**
@@ -549,6 +540,7 @@ function saveBuild() {
   const secondaryWeapon = document.getElementById('secondarySelect').value;
   const mount = document.getElementById('mountSelect').value;
   const blessing = document.getElementById('blessingSelect').value;
+  const blessingTargetWeapon = document.getElementById('blessingTargetWeaponSelect').value; // Save selected target weapon
   const runemark = document.getElementById('runemarkSelect').value;
 
   const build = {
@@ -560,6 +552,7 @@ function saveBuild() {
     secondaryWeapon,
     mount,
     blessing,
+    blessingTargetWeapon, // Add to saved build
     runemark
   };
 
@@ -588,6 +581,8 @@ function loadBuild() {
     document.getElementById('secondarySelect').value = build.secondaryWeapon || '';
     document.getElementById('mountSelect').value = build.mount || '';
     document.getElementById('blessingSelect').value = build.blessing || '';
+    updateSummary(); // This will populate blessingTargetWeaponSelect
+    document.getElementById('blessingTargetWeaponSelect').value = build.blessingTargetWeapon || 'None'; // Load selected target weapon
     document.getElementById('runemarkSelect').value = build.runemark || '';
 
     updateSummary(); // Final update to reflect all loaded selections
@@ -607,7 +602,7 @@ function loadBuildFromFile() {
   input.click(); // Trigger file input click
 
   input.onchange = function(event) {
-    const file = event.target.files[0];
+    const file = event.files[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -624,6 +619,8 @@ function loadBuildFromFile() {
         document.getElementById('secondarySelect').value = build.secondaryWeapon || '';
         document.getElementById('mountSelect').value = build.mount || '';
         document.getElementById('blessingSelect').value = build.blessing || '';
+        updateSummary(); // This will populate blessingTargetWeaponSelect
+        document.getElementById('blessingTargetWeaponSelect').value = build.blessingTargetWeapon || 'None'; // Load selected target weapon
         document.getElementById('runemarkSelect').value = build.runemark || '';
         updateSummary(); // Final update
         const validationMessagesDiv = document.getElementById('validationMessages');

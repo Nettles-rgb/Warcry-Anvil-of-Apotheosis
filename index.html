@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Warcry Anvil of Apotheosis Builder</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,14 +12,14 @@
   <div class="builder">
     <div class="options">
       <h2>Selections</h2>
-      
+
       <label>Fighter Name:</label>
       <input type="text" id="fighterNameInput" maxlength="30" placeholder="Enter a name (30 chars max)">
       <br>
-      
+
       <label style="display: block; margin-top: 10px;">Fighter Type:</label>
       <select id="fighterSelect"></select>
-      
+
       <label>Faction Runemark:</label>
       <select id="factionSelect"></select>
 
@@ -37,10 +38,14 @@
       <label>Divine Blessing:</label>
       <select id="blessingSelect"></select>
 
+      <label>Target Weapon for Blessing:</label>
+      <select id="blessingTargetWeaponSelect" disabled></select>
+
       <label>Additional Runemark:</label>
       <select id="runemarkSelect"></select>
 
       <button onclick="saveBuild()">Save Build (Local)</button>
+      <button onclick="loadBuild()">Load Build (Local)</button>
       <button onclick="loadBuildFromFile()">Load Build (Upload)</button>
       <button onclick="exportBuildPDF()">Export Build (PDF)</button>
       <input type="file" id="loadFileInput" style="display:none" accept=".txt">
@@ -55,8 +60,8 @@
         <p><strong>Faction Runemark:</strong> <span id="factionRunemarkDisplay">-</span></p>
         <p><strong>Runemarks:</strong> <span id="runemarkDisplay">-</span></p>
         <p><strong>Core Stats:</strong><br>
-          Movement: <span id="statMv"></span>,
-          Toughness: <span id="statT"></span>,
+          Movement: <span id="statMv"></span>,<br>
+          Toughness: <span id="statT"></span>,<br>
           Wounds: <span id="statW"></span>
         </p>
         <p><strong>Attack Profiles:</strong></p>
