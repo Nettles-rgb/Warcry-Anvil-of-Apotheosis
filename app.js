@@ -485,7 +485,9 @@ function updateSummary() {
       // Ensure range is displayed correctly, handling cases where it might be a string like "baseReach"
       const minRange = profile.range[0] === "baseReach" ? currentFighter.R : profile.range[0];
       const maxRange = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
-      li.textContent = `${profile.name}: Range ${minRange}"-${maxRange}", Attacks ${profile.attacks}, Strength ${profile.strength}, Damage ${profile.damage}/${profile.crit} (Crit)`;
+      // Determine the display format for the range
+      const rangeDisplay = minRange > 0 ? `${minRange}"-${maxRange}"` : `${maxRange}"`;
+      li.textContent = `${profile.name}: Range ${rangeDisplay}, Attacks ${profile.attacks}, Strength ${profile.strength}, Damage ${profile.damage}/${profile.crit} (Crit)`;
       attackProfilesUl.appendChild(li);
     });
   } else {
