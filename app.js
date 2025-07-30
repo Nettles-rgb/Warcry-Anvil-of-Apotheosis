@@ -355,7 +355,6 @@ function updateSummary() {
       profile.damage += (selectedPrimaryWeapon.effects.damageBonus || 0);
       profile.crit += (selectedPrimaryWeapon.effects.critBonus || 0);
     }
-    profile.weaponRunemark = selectedPrimaryWeapon.weaponRunemark;
 
     tempAttackProfiles.push(profile);
     // Check if it's a melee weapon (min range 0 or baseReach which is 0)
