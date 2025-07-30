@@ -339,6 +339,7 @@ function updateSummary() {
     // Deep copy the profile and its range array to prevent cumulative effects
     const profile = { ...selectedPrimaryWeapon.profile, range: [...selectedPrimaryWeapon.profile.range] };
     profile.name = selectedPrimaryWeapon.name;
+    profile.weaponRunemark = selectedPrimaryWeapon.weaponRunemark;
 
     // Resolve "base" stats using currentFighter's modified stats
     profile.attacks = profile.attacks === "baseAttacks" ? currentFighter.A : profile.attacks;
@@ -368,6 +369,7 @@ function updateSummary() {
     // Deep copy the profile and its range array
     const profile = { ...selectedSecondaryWeapon.profile, range: [...selectedSecondaryWeapon.profile.range] };
     profile.name = selectedSecondaryWeapon.name;
+    profile.weaponRunemark = selectedSecondaryWeapon.weaponRunemark;
 
     // Resolve "base" stats using currentFighter's modified stats
     profile.attacks = profile.attacks === "baseAttacks" ? currentFighter.A : profile.attacks;
@@ -396,6 +398,7 @@ function updateSummary() {
     // Deep copy the profile and its range array
     const profile = { ...selectedArchetype.profile, range: [...selectedArchetype.profile.range] };
     profile.name = selectedArchetype.profile.name;
+    profile.weaponRunemark = selectedArchetype.weaponRunemark;
     // Resolve baseReach for archetype profiles
     profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
     tempAttackProfiles.push(profile);
@@ -409,6 +412,7 @@ function updateSummary() {
     // Deep copy the profile and its range array
     const profile = { ...selectedMount.profile, range: [...selectedMount.profile.range] };
     profile.name = selectedMount.profile.name;
+    profile.weaponRunemark = selectedMount.weaponRunemark;
     // Resolve baseReach for mount profiles
     profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
     tempAttackProfiles.push(profile);
