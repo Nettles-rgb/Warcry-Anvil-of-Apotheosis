@@ -20,6 +20,26 @@
     }
   },
   {
+    "name": "Pair of Hand Weapons",
+    "points": 10,
+    "handedness": "two",
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Blade"
+    },
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
+  },
+  {
     "name": "Spear",
     "points": 0,
     "handedness": "one",
