@@ -104,7 +104,7 @@ function updateSummary() {
   };
   let currentRunemarks = [];
   let currentFactionRunemark = 'None';
-  let hasMeleeWeapon = false; // Flag to check if any selected weapon is melee
+  let hasMeleeWeapon = false; // Flag to check if any selected weapon is usable in base combat
 
   // --- 1. Base Fighter Selection ---
   const selectedFighter = getSelectedData('fighterSelect', data.fighters);
@@ -417,7 +417,7 @@ function updateSummary() {
     }
   }
 
-  // Conditional Unarmed Removal: Remove the unarmed profile if any melee weapon is present
+  // Conditional Unarmed Removal: Remove the unarmed profile if any weapon usable in base combat is present
   if (hasMeleeWeapon) {
     tempAttackProfiles = tempAttackProfiles.filter(p => p.name !== "Unarmed");
   }
@@ -431,8 +431,10 @@ function updateSummary() {
 
   if (selectedBlessing && selectedBlessing.targetable && selectedBlessing.weaponEffect) {
     eligibleTargetWeapons = finalAttackProfiles.filter(profile => {
-      const isMelee = (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0));
-      return (selectedBlessing.targetProfile === "melee" && isMelee) ||
+      // Define a melee weapon for blessing purposes: min range 0 AND max range <= 3
+      const isMeleeForBlessing = (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) && (profile.range[1] <= 3);
+
+      return (selectedBlessing.targetProfile === "melee" && isMeleeForBlessing) ||
              (selectedBlessing.targetProfile === "any");
     }).map(profile => profile.name);
   }
