@@ -431,8 +431,12 @@ function updateSummary() {
 
   if (selectedBlessing && selectedBlessing.targetable && selectedBlessing.weaponEffect) {
     eligibleTargetWeapons = finalAttackProfiles.filter(profile => {
+      // Resolve range for comparison
+      const minRangeResolved = profile.range[0] === "baseReach" ? currentFighter.R : profile.range[0];
+      const maxRangeResolved = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
+
       // Define a melee weapon for blessing purposes: min range 0 AND max range <= 3
-      const isMeleeForBlessing = (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) && (profile.range[1] <= 3);
+      const isMeleeForBlessing = (minRangeResolved === 0) && (maxRangeResolved <= 3);
 
       return (selectedBlessing.targetProfile === "melee" && isMeleeForBlessing) ||
              (selectedBlessing.targetProfile === "any");
@@ -502,6 +506,8 @@ function updateSummary() {
  */
 function populateSelections() {
   fillSelect('fighterSelect', data.fighters.map(f => f.name));
+  document.getElementById('fighterSelect').value = 'Stormcast Eternal'; // Default to Stormcast Eternal
+
   fillSelect('archetypeSelect', data.archetypes.map(a => a.name), false); // Archetype must be selected, no 'None'
 
   fillSelect('mountSelect', data.mounts.map(m => m.name), true); // Mounts can be 'None'
@@ -594,7 +600,7 @@ function loadBuildFromFile() {
   input.click(); // Trigger file input click
 
   input.onchange = function(event) {
-    const file = event.target.files[0];
+    const file = event.files[0];
     if (!file) return;
 
     const reader = new FileReader();
