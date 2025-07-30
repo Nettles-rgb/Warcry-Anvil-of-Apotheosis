@@ -339,7 +339,6 @@ function updateSummary() {
     // Deep copy the profile and its range array to prevent cumulative effects
     const profile = { ...selectedPrimaryWeapon.profile, range: [...selectedPrimaryWeapon.profile.range] };
     profile.name = selectedPrimaryWeapon.name;
-    profile.weaponRunemark = selectedPrimaryWeapon.weaponRunemark;
 
     // Resolve "base" stats using currentFighter's modified stats
     profile.attacks = profile.attacks === "baseAttacks" ? currentFighter.A : profile.attacks;
@@ -356,6 +355,7 @@ function updateSummary() {
       profile.damage += (selectedPrimaryWeapon.effects.damageBonus || 0);
       profile.crit += (selectedPrimaryWeapon.effects.critBonus || 0);
     }
+    profile.weaponRunemark = selectedPrimaryWeapon.weaponRunemark;
 
     tempAttackProfiles.push(profile);
     // Check if it's a melee weapon (min range 0 or baseReach which is 0)
