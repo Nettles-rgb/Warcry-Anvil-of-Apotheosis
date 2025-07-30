@@ -491,7 +491,7 @@ function updateSummary() {
       const maxRange = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
       // Determine the display format for the range
       const rangeDisplay = minRange > 0 ? `${minRange}"-${maxRange}"` : `${maxRange}"`;
-      li.textContent = `${profile.name}: Range ${rangeDisplay}, Attacks ${profile.attacks}, Strength ${profile.strength}, Damage ${profile.damage}/${profile.crit} (Crit)`;
+      li.textContent = `${profile.name}: Range ${rangeDisplay}, Attacks ${profile.attacks}, Strength ${profile.strength}, Damage/Crit ${profile.damage}/${profile.crit}, Runemark: ${profile.weaponRunemark}`;
       attackProfilesUl.appendChild(li);
     });
   } else {
