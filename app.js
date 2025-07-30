@@ -505,8 +505,10 @@ function updateSummary() {
  * Populates the initial selection dropdowns.
  */
 function populateSelections() {
-  fillSelect('fighterSelect', data.fighters.map(f => f.name));
-  document.getElementById('fighterSelect').value = 'Stormcast Eternal'; // Default to Stormcast Eternal
+  fillSelect('fighterSelect', data.fighters.map(f => f.name), false); // Fighter Type should not allow 'None'
+  if (data.fighters.length > 0) {
+    document.getElementById('fighterSelect').value = data.fighters[0].name; // Default to the first fighter
+  }
 
   fillSelect('archetypeSelect', data.archetypes.map(a => a.name), false); // Archetype must be selected, no 'None'
 
