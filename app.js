@@ -609,13 +609,67 @@ Extra Runemark: ${document.getElementById('runemarkSelect').value}
 Total Points: ${document.getElementById('pointsTotal').textContent}`;
 }
 
+/**
+ * Exports the current fighter build to a PDF.
+ */
 function exportBuildPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
-  const content = document.getElementById('statsDisplay').innerText;
+
+  const fighterName = document.getElementById('fighterName').textContent;
+  const fighterType = document.getElementById('fighterType').textContent;
+  const factionRunemark = document.getElementById('factionRunemarkDisplay').textContent;
+  const runemarks = document.getElementById('runemarkDisplay').textContent;
+  const mv = document.getElementById('statMv').textContent;
+  const t = document.getElementById('statT').textContent;
+  const w = document.getElementById('statW').textContent;
+  const attackProfilesUl = document.getElementById('attackProfiles');
+  const blessingEffect = document.getElementById('blessingEffect').textContent;
+  const totalPoints = document.getElementById('pointsTotal').textContent;
+
+  let y = 10;
+  pdf.setFontSize(16);
+  pdf.text(`Warcry Anvil of Apotheosis Fighter Profile`, 10, y);
+  y += 10;
+
   pdf.setFontSize(12);
-  pdf.text(content, 10, 10);
-  pdf.save('fighter_build.pdf');
+  pdf.text(`Fighter Name: ${fighterName}`, 10, y);
+  y += 7;
+  pdf.text(`Fighter Type: ${fighterType}`, 10, y);
+  y += 7;
+  pdf.text(`Faction Runemark: ${factionRunemark}`, 10, y);
+  y += 7;
+  pdf.text(`Runemarks: ${runemarks}`, 10, y);
+  y += 10;
+
+  pdf.setFontSize(14);
+  pdf.text(`Core Stats:`, 10, y);
+  y += 7;
+  pdf.setFontSize(12);
+  pdf.text(`Movement: ${mv}, Toughness: ${t}, Wounds: ${w}`, 10, y);
+  y += 10;
+
+  pdf.setFontSize(14);
+  pdf.text(`Attack Profiles:`, 10, y);
+  y += 7;
+  pdf.setFontSize(12);
+  Array.from(attackProfilesUl.children).forEach(li => {
+    pdf.text(li.textContent, 10, y);
+    y += 7;
+  });
+  y += 10;
+
+  pdf.setFontSize(14);
+  pdf.text(`Divine Blessing:`, 10, y);
+  y += 7;
+  pdf.setFontSize(12);
+  pdf.text(blessingEffect, 10, y);
+  y += 10;
+
+  pdf.setFontSize(14);
+  pdf.text(`Total Points: ${totalPoints}`, 10, y);
+
+  pdf.save(`${fighterName.replace(/ /g, '_')}_Warcry_Fighter_Profile.pdf`);
 }
 
 
