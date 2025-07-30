@@ -272,7 +272,7 @@ function updateSummary() {
   if (selectedBlessing) {
     const pointsKey = currentFighter.W < 23 ? 'pointsLow' : 'pointsHigh';
     currentPoints += selectedBlessing[pointsKey];
-    blessingEffectText = selectedBlessing.description || selectedBlessing.specialEffect || selectedBlessing.name;
+    blessingEffectText = `${selectedBlessing.name} - ${selectedBlessing.description || selectedBlessing.specialEffect || ''}`;
 
     if (selectedBlessing.fighterEffects) {
       if (selectedBlessing.fighterEffects.movementBonus) currentFighter.Mv += selectedBlessing.fighterEffects.movementBonus;
