@@ -355,6 +355,7 @@ function updateSummary() {
       profile.damage += (selectedPrimaryWeapon.effects.damageBonus || 0);
       profile.crit += (selectedPrimaryWeapon.effects.critBonus || 0);
     }
+    profile.weaponRunemark = selectedPrimaryWeapon.profile.weaponRunemark;
 
     tempAttackProfiles.push(profile);
     // Check if it's a melee weapon (min range 0 or baseReach which is 0)
@@ -368,7 +369,7 @@ function updateSummary() {
     // Deep copy the profile and its range array
     const profile = { ...selectedSecondaryWeapon.profile, range: [...selectedSecondaryWeapon.profile.range] };
     profile.name = selectedSecondaryWeapon.name;
-    profile.weaponRunemark = selectedSecondaryWeapon.weaponRunemark;
+    profile.weaponRunemark = selectedSecondaryWeapon.profile.weaponRunemark;
 
     // Resolve "base" stats using currentFighter's modified stats
     profile.attacks = profile.attacks === "baseAttacks" ? currentFighter.A : profile.attacks;
@@ -397,7 +398,7 @@ function updateSummary() {
     // Deep copy the profile and its range array
     const profile = { ...selectedArchetype.profile, range: [...selectedArchetype.profile.range] };
     profile.name = selectedArchetype.profile.name;
-    profile.weaponRunemark = selectedArchetype.weaponRunemark;
+    profile.weaponRunemark = selectedArchetype.profile.weaponRunemark;
     // Resolve baseReach for archetype profiles
     profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
     tempAttackProfiles.push(profile);
@@ -411,7 +412,7 @@ function updateSummary() {
     // Deep copy the profile and its range array
     const profile = { ...selectedMount.profile, range: [...selectedMount.profile.range] };
     profile.name = selectedMount.profile.name;
-    profile.weaponRunemark = selectedMount.weaponRunemark;
+    profile.weaponRunemark = selectedMount.profile.weaponRunemark;
     // Resolve baseReach for mount profiles
     profile.range[1] = profile.range[1] === "baseReach" ? currentFighter.R : profile.range[1];
     tempAttackProfiles.push(profile);
