@@ -30,8 +30,7 @@
     "points": 20,
     "runemarksAdded": ["Mystic"],
     "fighterEffects": {
-      "meleeAttackBonus": -1,
-      "meleeAttackMin": 1
+      "meleeAttackBonus": -1
     },
     "profile": {
       "name": "Magic Missile",
