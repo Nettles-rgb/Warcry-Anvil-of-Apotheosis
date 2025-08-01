@@ -30,26 +30,6 @@
     }
   },
   {
-    "name": "Additional Hand Weapon",
-    "points": 10,
-    "handedness": "one",
-    "profile": {
-      "range": [0, "baseReach"],
-      "attacks": "baseAttacks",
-      "strength": "baseStrength",
-      "damage": "baseDamage",
-      "crit": "baseCrit",
-      "weaponRunemark": "Blade"
-    },
-    "effects": {
-      "rangeBonus": 0,
-      "attackBonus": 1,
-      "strengthBonus": 0,
-      "damageBonus": 0,
-      "critBonus": 0
-    }
-  },
-  {
     "name": "Pistol",
     "points": 20,
     "handedness": "one",

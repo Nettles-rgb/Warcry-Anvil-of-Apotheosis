@@ -34,7 +34,7 @@
       "meleeAttackMin": 1
     },
     "profile": {
-      "name": "Arcane Bolt",
+      "name": "Magic Missile",
       "range": [3, 7],
       "attacks": 2,
       "strength": 3,

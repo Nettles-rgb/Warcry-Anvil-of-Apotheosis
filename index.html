@@ -45,7 +45,6 @@
       <select id="runemarkSelect"></select>
 
       <button onclick="saveBuild()">Save Build (Local)</button>
-      <button onclick="loadBuild()">Load Build (Local)</button>
       <button onclick="loadBuildFromFile()">Load Build (Upload)</button>
       <button onclick="exportBuildPDF()">Export Build (PDF)</button>
       <input type="file" id="loadFileInput" style="display:none" accept=".txt">
@@ -59,9 +58,9 @@
         <p><strong>Fighter Type:</strong> <span id="fighterType">-</span></p>
         <p><strong>Faction Runemark:</strong> <span id="factionRunemarkDisplay">-</span></p>
         <p><strong>Runemarks:</strong> <span id="runemarkDisplay">-</span></p>
-        <p><strong>Core Stats:</strong><br>
-          Movement: <span id="statMv"></span>,<br>
-          Toughness: <span id="statT"></span>,<br>
+        <p><strong>Core Stats:</strong> 
+          Movement: <span id="statMv"></span>, 
+          Toughness: <span id="statT"></span>, 
           Wounds: <span id="statW"></span>
         </p>
         <p><strong>Attack Profiles:</strong></p>
@@ -71,6 +70,6 @@
       </div>
     </div>
   </div>
-  <script src="app.js"></script>
+ <script src="app.js"></script>
 </body>
 </html>

@@ -20,6 +20,26 @@
     }
   },
   {
+    "name": "Pair of Hand Weapons",
+    "points": 10,
+    "handedness": "two",
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Blade"
+    },
+    "effects": {
+      "rangeBonus": 0,
+      "attackBonus": 1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 0
+    }
+  },
+  {
     "name": "Spear",
     "points": 0,
     "handedness": "one",
@@ -30,6 +50,26 @@
       "damage": "baseDamage",
       "crit": "baseCrit",
       "weaponRunemark": "Spear"
+    },
+    "effects": {
+      "rangeBonus": 1,
+      "attackBonus": -1,
+      "strengthBonus": 0,
+      "damageBonus": 0,
+      "critBonus": 1
+    }
+  },
+  {
+    "name": "Bident",
+    "points": 0,
+    "handedness": "one",
+    "profile": {
+      "range": [0, "baseReach"],
+      "attacks": "baseAttacks",
+      "strength": "baseStrength",
+      "damage": "baseDamage",
+      "crit": "baseCrit",
+      "weaponRunemark": "Bident"
     },
     "effects": {
       "rangeBonus": 1,
@@ -164,7 +204,7 @@
   },
   {
     "name": "Grandspear",
-    "points": 5,
+    "points": 10,
     "handedness": "two",
     "profile": {
       "range": [0, "baseReach"],
@@ -179,7 +219,7 @@
       "attackBonus": 0,
       "strengthBonus": 0,
       "damageBonus": 0,
-      "critBonus": 0
+      "critBonus": 1
     }
   },
   {
