@@ -361,6 +361,7 @@ function updateSummary() {
     // Check if it's a melee weapon (min range 0 or baseReach which is 0)
     if (profile.range[0] === 0 || (profile.range[0] === "baseReach" && currentFighter.R === 0)) {
       hasMeleeWeapon = true;
+      profile.attacks += Math.max(selectedArchetype.fighterEffects.meleeAttackBonus || 0, rules.unarmedPenalties.minimumValues.attacks);
     }
   }
 
