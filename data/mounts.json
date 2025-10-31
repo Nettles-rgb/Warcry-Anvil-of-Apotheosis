@@ -52,7 +52,7 @@
       "critBonus": 0
     },
     "restrictions": {
-      "forbiddenFighters": ["Ogor", "Bullgor", "Dragon Ogor"],
+      "forbiddenFighters": ["Bullgor", "Dragon Ogor"],
       "maxMovement": 8,
       "noMountedRunemarkFor": ["Malignant"]
     }
