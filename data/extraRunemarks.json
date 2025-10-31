@@ -1,14 +1,14 @@
 [
   {
     "name": "Fly",
-    "points": 15,
+    "points": 20,
     "restrictions": {
       "cannotBeMounted": true
     }
   },
   {
     "name": "Agile",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
@@ -22,119 +22,119 @@
   },
   {
     "name": "Berserker",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Brute",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Bulwark",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Champion",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Sentience",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Destroyer",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Elite",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Ferocious",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Frenzied",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Icon Bearer",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Minion",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Mystic",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Priest",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Scout",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Terrifying",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Trapper",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
   },
   {
     "name": "Warrior",
-    "points": 5,
+    "points": 10,
     "restrictions": {
       "cannotBeMounted": false
     }
