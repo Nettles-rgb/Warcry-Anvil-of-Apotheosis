@@ -148,7 +148,7 @@
     "C": 4,
     "runemarks": ["Hero"],
     "factionRunemarks": ["Gloomspite Gitz"],
-    "points": 125
+    "points": 115
   },
   {
     "name": "Ironjaw Orruk",
@@ -162,7 +162,7 @@
     "C": 5,
     "runemarks": ["Hero"],
     "factionRunemarks": ["Ironjawz"],
-    "points": 195
+    "points": 205
   },
   {
     "name": "Ogor",
@@ -176,7 +176,7 @@
     "C": 8,
     "runemarks": ["Hero", "Brute"],
     "factionRunemarks": ["Ogor Mawtribes", "Gorger Mawpack"],
-    "points": 250
+    "points": 260
   },
   {
     "name": "Kruleboyz Orruk",
@@ -273,7 +273,7 @@
       "Chaos Legionnaires",
       "Scions of Flame"
     ],
-    "points": 150
+    "points": 145
   },
   {
     "name": "Darkoath",
