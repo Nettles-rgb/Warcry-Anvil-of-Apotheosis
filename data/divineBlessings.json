@@ -25,8 +25,8 @@
       "woundsBonus": 4
     },
     "description": "Add 4 to the Wounds characteristic of this fighter.",
-    "pointsLow": 15,
-    "pointsHigh": 15,
+    "pointsLow": 20,
+    "pointsHigh": 20,
     "targetable": false
   },
   {
@@ -35,8 +35,8 @@
       "attackBonus": 1
     },
     "description": "Add 1 to the Attacks characteristic of one of this fighter's melee weapons.",
-    "pointsLow": 25,
-    "pointsHigh": 30,
+    "pointsLow": 30,
+    "pointsHigh": 40,
     "targetable": true,
     "targetProfile": "melee"
   },
@@ -57,8 +57,8 @@
       "damageBonus": 1
     },
     "description": "Add 1 to the first Damage characteristic of one of this fighter's melee weapons.",
-    "pointsLow": 25,
-    "pointsHigh": 30,
+    "pointsLow": 30,
+    "pointsHigh": 40,
     "targetable": true,
     "targetProfile": "melee"
   },
