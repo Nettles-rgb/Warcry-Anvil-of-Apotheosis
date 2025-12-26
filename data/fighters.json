@@ -88,7 +88,6 @@
     "factionRunemarks": [
       "Fyreslayers",
       "Kharadron Overlords",
-      "Helsmiths of Hashut",
       "Vulkyn Flameseekers",
       "Dispossessed"
     ],
@@ -191,6 +190,20 @@
     "runemarks": ["Hero"],
     "factionRunemarks": ["Kruleboyz", "Monsta-Killaz"],
     "points": 165
+  },
+  {
+    "name": "Hobgrot",
+    "Mv": 4,
+    "T": 4,
+    "W": 16,
+    "R": 1,
+    "A": 4,
+    "S": 3,
+    "D": 2,
+    "C": 3,
+    "runemarks": ["Hero", "Minion"],
+    "factionRunemarks": ["Kruelboyz", "Helsmiths of Hashut"],
+    "points": 115
   },
   {
     "name": "Gor",
@@ -303,6 +316,20 @@
       "The Unmade"
     ],
     "points": 140
+  },
+  {
+    "name": "Chaos Duardin",
+    "Mv": 3,
+    "T": 4,
+    "W": 20,
+    "R": 1,
+    "A": 4,
+    "S": 4,
+    "D": 2,
+    "C": 4,
+    "runemarks": ["Hero", "Warrior"],
+    "factionRunemarks": ["Helsmiths of Hashut"],
+    "points": 135
   },
   {
     "name": "Skaven",
