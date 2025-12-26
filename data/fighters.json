@@ -192,6 +192,20 @@
     "points": 165
   },
   {
+    "name": "Hobgrot",
+    "Mv": 4,
+    "T": 4,
+    "W": 16,
+    "R": 1,
+    "A": 4,
+    "S": 3,
+    "D": 2,
+    "C": 3,
+    "runemarks": ["Hero", "Minion"],
+    "factionRunemarks": ["Kruelboyz", "Helsmiths of Hashut"],
+    "points": 115
+  },
+  {
     "name": "Gor",
     "Mv": 5,
     "T": 4,
